@@ -15,6 +15,12 @@ import random
 from pathlib import Path
 from statistics import mean, stdev
 
+import os, joblib
+MODEL_OVERRIDE = None
+_override_path = os.getenv("NBA_MODEL_PATH")  # e.g. backend/ml/xgb_model.pkl
+if _override_path and os.path.exists(_override_path):
+    MODEL_OVERRIDE = joblib.load(_override_path)
+
 import joblib
 import pandas as pd
 from sklearn.ensemble import GradientBoostingClassifier
@@ -52,17 +58,31 @@ def _load_data() -> pd.DataFrame:
     )
 
 
-def _make_pipeline() -> Pipeline:
-    """Returns Imputer → GradientBoosting pipeline."""
-    return Pipeline(
-        steps=[
-            ("imputer", SimpleImputer(strategy="median")),
-            ("model", GradientBoostingClassifier(random_state=RANDOM_SEED)),
-        ]
-    )
+def _make_pipeline():
+    if MODEL_OVERRIDE is not None:
+        return MODEL_OVERRIDE          # use tuned model
+    from sklearn.ensemble import GradientBoostingClassifier
+    from sklearn.impute   import SimpleImputer
+    from sklearn.pipeline import Pipeline
+    return Pipeline([
+        ("imp", SimpleImputer(strategy="median")),
+        ("gb",  GradientBoostingClassifier(random_state=42)),
+    ])
 
 
-def _train_pipeline(train_df: pd.DataFrame) -> Pipeline:
+TEMPLATE_PATH = Path("backend/ml/ensemble_template.pkl")
+
+def _train_pipeline(train_df: pd.DataFrame):
+    """
+    Load the ensemble template (VotingClassifier with GB+XGB),
+    fit it on this training slice, return the trained ensemble.
+    """
+    if not TEMPLATE_PATH.exists():
+        raise FileNotFoundError(
+            "ensemble_template.pkl not found – run "
+            "backend/ml/build_ensemble_template.py first."
+        )
+
     X = train_df.drop(columns=["GAME_ID", "GAME_DATE", "HOME_WIN"])
     y = train_df["HOME_WIN"]
 
@@ -70,9 +90,10 @@ def _train_pipeline(train_df: pd.DataFrame) -> Pipeline:
     if n_missing:
         print(f"↪ Imputing {n_missing} missing values in training set")
 
-    pipe = _make_pipeline()
-    pipe.fit(X, y)
-    return pipe
+    # load fresh, un-fitted ensemble each time
+    model = joblib.load(TEMPLATE_PATH)
+    model.fit(X, y)          # trains GB and XGB on this slice
+    return model
 
 
 def _metric_dict(y_true, y_pred, y_prob) -> dict:
