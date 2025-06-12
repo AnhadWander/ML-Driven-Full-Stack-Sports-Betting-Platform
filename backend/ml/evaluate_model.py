@@ -1,239 +1,191 @@
+#!/usr/bin/env python3
 """
-backend/ml/evaluate_model.py
-──────────────────────────────────────────────────────────────
-Leakage-free, time-aware evaluation for NBA home-win prediction.
+Evaluate rolling NBA model on historical data.
 
-Public functions
-────────────────
-• evaluate_single_game()
-• evaluate_future_block(block_size=30)
-• evaluate_multiple_blocks(n_runs=30, block_size=30)
-• save_full_history_model()
+* 30 “future window” evaluations (50-game blocks)
+* 1 final single-game check (latest game)
+
+Requires: data/processed/rolling_features.csv
 """
 
-import random
+from __future__ import annotations
+
 from pathlib import Path
 from statistics import mean, stdev
-
-import os, joblib
-MODEL_OVERRIDE = None
-_override_path = os.getenv("NBA_MODEL_PATH")  # e.g. backend/ml/xgb_model.pkl
-if _override_path and os.path.exists(_override_path):
-    MODEL_OVERRIDE = joblib.load(_override_path)
+import warnings
 
 import joblib
+import numpy as np
 import pandas as pd
-from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import GradientBoostingClassifier, VotingClassifier
 from sklearn.impute import SimpleImputer
-from sklearn.metrics import (
-    accuracy_score,
-    confusion_matrix,
-    f1_score,
-    precision_score,
-    recall_score,
-    roc_auc_score,
-)
+from sklearn.metrics import (accuracy_score, confusion_matrix, f1_score,
+                             precision_score, recall_score, roc_auc_score)
 from sklearn.pipeline import Pipeline
 
-# ──────────────────────────────────────────────
-FEAT_DATA = Path("data/processed/rolling_features.csv")
-MODEL_PATH = Path("backend/ml/rolling_model.pkl")
+# ---------------------------------------------------------------------------
+# CONFIG
+# ---------------------------------------------------------------------------
+DATA_FILE   = Path("data/processed/rolling_features.csv")
+MODEL_OUT   = Path("backend/ml/rolling_model.pkl")
+
+BLOCK_SIZE  = 50
+N_RUNS      = 30
 RANDOM_SEED = 42
-random.seed(RANDOM_SEED)
-# ──────────────────────────────────────────────
+
+DROP_ALWAYS     = ["GAME_DATE", "HOME_WIN"]       # never used for training
+OPTIONAL_DROPS  = ["GAME_ID"]                     # drop if present
+IMPUTE_STRAT    = "median"
+# ---------------------------------------------------------------------------
 
 
-# ╔══════════════════════════════════════════╗
-# ║  Data & model helpers                   ║
-# ╚══════════════════════════════════════════╝
-def _load_data() -> pd.DataFrame:
-    if not FEAT_DATA.exists():
-        raise FileNotFoundError(
-            f"{FEAT_DATA} not found – run scripts/build_rolling_features.py first."
-        )
-    return (
-        pd.read_csv(FEAT_DATA)
-        .sort_values("GAME_DATE")
-        .reset_index(drop=True)
+# ---------------------------------------------------------------------------
+# HELPERS
+# ---------------------------------------------------------------------------
+def _safe_drop(df: pd.DataFrame) -> pd.DataFrame:
+    """Return numeric features excl. DROP_ALWAYS + OPTIONAL_DROPS (if present)."""
+    to_drop = DROP_ALWAYS + [c for c in OPTIONAL_DROPS if c in df.columns]
+    return df.drop(columns=to_drop, errors="ignore").select_dtypes("number")
+
+
+def _build_model() -> Pipeline:
+    """Pipeline: median-impute → voting(GB + GB-as-XGB-stand-in)."""
+    num_pipe = Pipeline([("imputer", SimpleImputer(strategy=IMPUTE_STRAT))])
+    pre      = ColumnTransformer([("num", num_pipe, slice(None))], remainder="drop")
+
+    gb  = GradientBoostingClassifier(random_state=RANDOM_SEED)
+    xgb = GradientBoostingClassifier(
+        random_state=RANDOM_SEED, learning_rate=0.05,
+        n_estimators=400, subsample=0.8, max_depth=3
     )
 
-
-def _make_pipeline():
-    if MODEL_OVERRIDE is not None:
-        return MODEL_OVERRIDE          # use tuned model
-    from sklearn.ensemble import GradientBoostingClassifier
-    from sklearn.impute   import SimpleImputer
-    from sklearn.pipeline import Pipeline
-    return Pipeline([
-        ("imp", SimpleImputer(strategy="median")),
-        ("gb",  GradientBoostingClassifier(random_state=42)),
-    ])
-
-
-TEMPLATE_PATH = Path("backend/ml/ensemble_template.pkl")
-
-def _train_pipeline(train_df: pd.DataFrame):
-    """
-    Load the ensemble template (VotingClassifier with GB+XGB),
-    fit it on this training slice, return the trained ensemble.
-    """
-    if not TEMPLATE_PATH.exists():
-        raise FileNotFoundError(
-            "ensemble_template.pkl not found – run "
-            "backend/ml/build_ensemble_template.py first."
-        )
-
-    X = train_df.drop(columns=["GAME_ID", "GAME_DATE", "HOME_WIN"])
-    y = train_df["HOME_WIN"]
-
-    n_missing = int(X.isna().sum().sum())
-    if n_missing:
-        print(f"↪ Imputing {n_missing} missing values in training set")
-
-    # load fresh, un-fitted ensemble each time
-    model = joblib.load(TEMPLATE_PATH)
-    model.fit(X, y)          # trains GB and XGB on this slice
-    return model
-
-
-def _metric_dict(y_true, y_pred, y_prob) -> dict:
-    """Compute metrics, handling single-class ROC/AUC."""
-    metrics = {
-        "accuracy": accuracy_score(y_true, y_pred),
-        "precision": precision_score(y_true, y_pred, zero_division=0),
-        "recall": recall_score(y_true, y_pred, zero_division=0),
-        "f1": f1_score(y_true, y_pred, zero_division=0),
-        "roc_auc": None,
-    }
-    if len(set(y_true)) > 1:
-        metrics["roc_auc"] = roc_auc_score(y_true, y_prob)
-    return metrics
-
-
-def _print_metrics(metrics: dict):
-    print(f"Accuracy : {metrics['accuracy']:.3f}")
-    print(f"Precision: {metrics['precision']:.3f}")
-    print(f"Recall   : {metrics['recall']:.3f}")
-    print(f"F1 Score : {metrics['f1']:.3f}")
-    roc_msg = (
-        f"{metrics['roc_auc']:.3f}"
-        if metrics["roc_auc"] is not None
-        else "n/a (one class only)"
+    ens = VotingClassifier(
+        estimators=[("gb", gb), ("xgb", xgb)],
+        voting="soft",
+        n_jobs=-1,
     )
-    print(f"ROC-AUC  : {roc_msg}")
+
+    return Pipeline([("pre", pre), ("model", ens)])
 
 
-# ╔══════════════════════════════════════════╗
-# ║  Evaluation modes                       ║
-# ╚══════════════════════════════════════════╝
-def evaluate_single_game(min_train: int = 50):
-    """Train on all games < index; predict one future game."""
-    df = _load_data()
-    test_idx = random.randrange(min_train, len(df))
+def _metrics(y_true, y_pred, proba=None) -> dict[str, float]:
+    out = dict(
+        acc  = accuracy_score(y_true, y_pred),
+        prec = precision_score(y_true, y_pred, zero_division=0),
+        rec  = recall_score(y_true, y_pred, zero_division=0),
+        f1   = f1_score(y_true, y_pred, zero_division=0),
+    )
+    if proba is not None and len(set(y_true)) == 2:
+        out["auc"] = roc_auc_score(y_true, proba[:, 1])
+    return out
 
-    train_df = df.iloc[:test_idx]
-    test_df = df.iloc[test_idx : test_idx + 1]
 
-    pipe = _train_pipeline(train_df)
-    X_test = test_df.drop(columns=["GAME_ID", "GAME_DATE", "HOME_WIN"])
-    y_true = test_df["HOME_WIN"]
-    y_pred = pipe.predict(X_test)
-    y_prob = pipe.predict_proba(X_test)[:, 1]
-
+def _print_block_header(label: str):
     print("-" * 60)
-    print(
-        f"Evaluating GAME_ID {test_df.iloc[0]['GAME_ID']} "
-        f"on {test_df.iloc[0]['GAME_DATE']}"
+    print(label)
+
+
+def _print_block_results(m: dict[str, float]):
+    print(f"Accuracy : {m['acc'] :0.3f}")
+    print(f"Precision: {m['prec']:0.3f}")
+    print(f"Recall   : {m['rec'] :0.3f}")
+    print(f"F1 Score : {m['f1']  :0.3f}")
+    if "auc" in m:
+        print(f"ROC-AUC  : {m['auc']:0.3f}")
+    print()
+
+
+# ---------------------------------------------------------------------------
+# MAIN EVALUATION
+# ---------------------------------------------------------------------------
+def main():
+    warnings.filterwarnings("ignore", category=UserWarning, module="sklearn")
+
+    df = pd.read_csv(DATA_FILE, parse_dates=["GAME_DATE"])
+    df.sort_values("GAME_DATE", inplace=True)
+    df.reset_index(drop=True, inplace=True)
+
+    # -------------------------------------------------------- #
+    # Single latest-game check
+    # -------------------------------------------------------- #
+    train_latest = df.iloc[:-1]
+    test_latest  = df.iloc[-1:]
+
+    pipe = _build_model()
+    pipe.fit(_safe_drop(train_latest), train_latest["HOME_WIN"])
+    y_pred = pipe.predict(_safe_drop(test_latest))
+    y_prob = pipe.predict_proba(_safe_drop(test_latest))
+
+    _print_block_header(
+        f"Evaluating GAME_ID {test_latest.get('GAME_ID', pd.Series(['?'])).values[0]} "
+        f"on {test_latest['GAME_DATE'].dt.date.values[0]}"
     )
-    _print_metrics(_metric_dict(y_true, y_pred, y_prob))
-
-    # Confusion matrix (1×1)
-    print("\nConfusion Matrix:")
-    print(confusion_matrix(y_true, y_pred))
-
-
-def evaluate_future_block(block_size: int = 30, min_train: int = 50) -> dict:
-    """
-    Train on past games; predict the next `block_size` games.
-    Returns the metric dict for aggregation.
-    """
-    df = _load_data()
-    cutoff = random.randrange(min_train, len(df) - block_size)
-
-    train_df = df.iloc[:cutoff]
-    test_df = df.iloc[cutoff : cutoff + block_size]
-
-    pipe = _train_pipeline(train_df)
-    X_test = test_df.drop(columns=["GAME_ID", "GAME_DATE", "HOME_WIN"])
-    y_true = test_df["HOME_WIN"]
-    y_pred = pipe.predict(X_test)
-    y_prob = pipe.predict_proba(X_test)[:, 1]
-
+    m = _metrics(test_latest["HOME_WIN"], y_pred, y_prob)
+    _print_block_results(m)
+    print("Confusion Matrix:")
+    print(confusion_matrix(test_latest["HOME_WIN"], y_pred))
     print("-" * 60)
-    print(
-        f"Evaluating block starting {test_df.iloc[0]['GAME_DATE']} "
-        f"({block_size} games)"
+
+    # -------------------------------------------------------- #
+    # 30 future-window runs (BLOCK_SIZE each)
+    # -------------------------------------------------------- #
+    rng = np.random.default_rng(RANDOM_SEED)
+    start_indices = rng.choice(
+        range(len(df) - BLOCK_SIZE),
+        size=N_RUNS,
+        replace=False,
     )
-    block_metrics = _metric_dict(y_true, y_pred, y_prob)
-    _print_metrics(block_metrics)
-    print("\nConfusion Matrix:")
-    print(confusion_matrix(y_true, y_pred))
+    results: list[dict[str, float]] = []
 
-    return block_metrics
+    for idx, start in enumerate(sorted(start_indices), 1):
+        test  = df.iloc[start : start + BLOCK_SIZE]
+        train = df.iloc[:start]
 
+        if train.empty:
+            # not enough past games – skip this window
+            continue
 
-def evaluate_multiple_blocks(n_runs: int = 30, block_size: int = 30):
-    """
-    Run evaluate_future_block() `n_runs` times and print the mean ± stdev
-    of each metric.
-    """
-    acc, prec, rec, f1s, aucs = [], [], [], [], []
+        pipe = _build_model()
+        pipe.fit(_safe_drop(train), train["HOME_WIN"])
 
-    for _ in range(n_runs):
-        m = evaluate_future_block(block_size=block_size)
-        acc.append(m["accuracy"])
-        prec.append(m["precision"])
-        rec.append(m["recall"])
-        f1s.append(m["f1"])
-        if m["roc_auc"] is not None:
-            aucs.append(m["roc_auc"])
+        y_pred = pipe.predict(_safe_drop(test))
+        y_prob = pipe.predict_proba(_safe_drop(test))
 
-    def _avg(lst):
-        return mean(lst), (stdev(lst) if len(lst) > 1 else 0)
+        m = _metrics(test["HOME_WIN"], y_pred, y_prob)
+        results.append(m)
 
-    avg_acc, sd_acc = _avg(acc)
-    avg_prec, sd_prec = _avg(prec)
-    avg_rec, sd_rec = _avg(rec)
-    avg_f1, sd_f1 = _avg(f1s)
-    avg_auc, sd_auc = _avg(aucs) if aucs else (None, None)
+        _print_block_header(
+            f"Run {idx:02d}/{N_RUNS} — block starting "
+            f"{test['GAME_DATE'].dt.date.values[0]} ({BLOCK_SIZE} games)"
+        )
+        _print_block_results(m)
+        print("Confusion Matrix:")
+        print(confusion_matrix(test["HOME_WIN"], y_pred))
 
-    print("\n" + "=" * 60)
-    print(f"Averages across {n_runs} runs (block size {block_size}):")
-    print(f"Accuracy : {avg_acc:.3f}  ± {sd_acc:.3f}")
-    print(f"Precision: {avg_prec:.3f}  ± {sd_prec:.3f}")
-    print(f"Recall   : {avg_rec:.3f}  ± {sd_rec:.3f}")
-    print(f"F1 Score : {avg_f1:.3f}  ± {sd_f1:.3f}")
-    if avg_auc is None:
-        print("ROC-AUC  : n/a (some runs single-class)")
-    else:
-        print(f"ROC-AUC  : {avg_auc:.3f}  ± {sd_auc:.3f}")
-    print("=" * 60 + "\n")
+    # -------------------------------------------------------- #
+    # Summary stats
+    # -------------------------------------------------------- #
+    if results:
+        print("=" * 60)
+        print(f"Averages across {len(results)} runs (block size {BLOCK_SIZE}):")
+        for k in ("acc", "prec", "rec", "f1", "auc"):
+            vals = [r[k] for r in results if k in r]
+            if not vals:
+                continue
+            print(f"{k.upper():9}: {mean(vals):0.3f}  ± {stdev(vals):0.3f}")
+        print("=" * 60)
 
-
-def save_full_history_model():
-    """Train on *all* games and persist the model for API inference."""
-    df = _load_data()
-    pipe = _train_pipeline(df)
-    MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
-    joblib.dump(pipe, MODEL_PATH)
-    print(f"Full-history model saved → {MODEL_PATH}")
+    # -------------------------------------------------------- #
+    # Save full-history model for inference
+    # -------------------------------------------------------- #
+    full_pipe = _build_model()
+    full_pipe.fit(_safe_drop(df), df["HOME_WIN"])
+    MODEL_OUT.parent.mkdir(parents=True, exist_ok=True)
+    joblib.dump(full_pipe, MODEL_OUT)
+    print(f"\n✅  full-history model saved → {MODEL_OUT}")
 
 
-# ╔══════════════════════════════════════════╗
-# ║  CLI entry-point                         ║
-# ╚══════════════════════════════════════════╝
+# ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    evaluate_single_game()                 # quick sanity check
-    evaluate_future_block(block_size=50)   # one future window
-    evaluate_multiple_blocks(n_runs=30, block_size=50)  # averaged metrics
-    save_full_history_model()
+    main()
