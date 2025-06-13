@@ -12,7 +12,6 @@ Output
 ------
 data/processed/rolling_features.csv
 """
-
 import warnings
 from pathlib import Path
 
@@ -26,24 +25,22 @@ OUTFILE   = ROOT / "data" / "processed" / "rolling_features.csv"
 
 ROLL_N = 10          # games in look-back window
 SEASONS_BACK = 3     # keep last N seasons only
-
-
-# ------------------------------------------------------------------ #
-# 1.  READ & NORMALISE  GAME RESULTS (kaggle file)                    #
-# ------------------------------------------------------------------ #
+# ────────────────────────────────────────────────────────────────────
+# 1.  READ & NORMALISE  GAME RESULTS (kaggle file)
+# ────────────────────────────────────────────────────────────────────
 def load_games() -> pd.DataFrame:
     """
     Return a DF with one **game** per row, plus helper columns:
 
     GAME_DATE (datetime64[ns])
-    HOME_ABBREV  |  AWAY_ABBREV   (3-letter upper-case)
-    PTS_HOME     |  PTS_AWAY
-    HOME_WIN (1/0)
-    PDIFF_HOME  – point diff from home side perspective
+    HOME_ABBREV | AWAY_ABBREV   (3-letter upper-case)
+    PTS_HOME    | PTS_AWAY
+    HOME_WIN  (1/0)
+    PDIFF_HOME – point diff from home side perspective
     """
     df = pd.read_csv(RAW_GAMES)
 
-    # ─── rename / coerce ────────────────────────────────────────────
+    # ─── rename / coerce ───────────────────────────────────────────
     df = df.rename(
         columns={
             "date": "GAME_DATE",
@@ -54,10 +51,8 @@ def load_games() -> pd.DataFrame:
         }
     )
 
-    # abbreviations are already lower-case 3-letter; capitalise to match odds
     df["HOME_ABBREV"] = df["HOME_ABBREV"].str.upper()
     df["AWAY_ABBREV"] = df["AWAY_ABBREV"].str.upper()
-
     df["GAME_DATE"]   = pd.to_datetime(df["GAME_DATE"], errors="coerce")
 
     # keep only last N seasons
@@ -75,11 +70,9 @@ def load_games() -> pd.DataFrame:
         .reset_index(drop=True)
     )
     return df
-
-
-# ------------------------------------------------------------------ #
-# 2.  ADD VEGAS OPENERS                                               #
-# ------------------------------------------------------------------ #
+# ────────────────────────────────────────────────────────────────────
+# 2.  ADD VEGAS OPENERS
+# ────────────────────────────────────────────────────────────────────
 def load_odds() -> pd.DataFrame:
     """
     columns: GAME_DATE, HOME_ABBREV, AWAY_ABBREV,
@@ -98,21 +91,15 @@ def load_odds() -> pd.DataFrame:
         )
 
     odds = pd.read_csv(RAW_ODDS)
-    odds["GAME_DATE"] = pd.to_datetime(odds["GAME_DATE"])
+    odds["GAME_DATE"]   = pd.to_datetime(odds["GAME_DATE"])
     odds["HOME_ABBREV"] = odds["HOME_ABBREV"].str.upper()
     odds["AWAY_ABBREV"] = odds["AWAY_ABBREV"].str.upper()
     return odds
-
-
-# ------------------------------------------------------------------ #
-# 3.  ROLLING-WINDOW TEAM FEATURES                                    #
-# ------------------------------------------------------------------ #
+# ────────────────────────────────────────────────────────────────────
+# 3.  ROLLING-WINDOW TEAM FEATURES
+# ────────────────────────────────────────────────────────────────────
 def team_rolling_stats(games: pd.DataFrame) -> pd.DataFrame:
-    """
-    Compute last-N-games rolling averages **per team** then
-    widen so we have home + away features on the same row.
-    """
-    # melt to team-centric long form
+    """Compute last-N-games rolling averages per team and widen to home/away."""
     long = pd.concat(
         [
             games.rename(
@@ -129,23 +116,20 @@ def team_rolling_stats(games: pd.DataFrame) -> pd.DataFrame:
                     "PTS_AWAY": "PTS",
                 }
             )[["GAME_DATE", "TEAM", "PTS"]]
-            .assign(WIN=lambda d: 1 - games["HOME_WIN"].values,   # away win flag
-                    PD=lambda d: -games["PDIFF_HOME"].values),     # invert diff
+            .assign(
+                WIN=lambda d: 1 - games["HOME_WIN"].values,       # away win flag
+                PD=lambda d: -games["PDIFF_HOME"].values,         # invert diff
+            ),
         ]
     )
 
     long = long.sort_values(["TEAM", "GAME_DATE"])
 
-    # rolling means
     roll = (
         long
         .groupby("TEAM")
         .rolling(ROLL_N, on="GAME_DATE", min_periods=1)
-        .agg({
-            "PTS": "mean",
-            "WIN": "mean",
-            "PD":  "mean"
-        })
+        .agg({"PTS": "mean", "WIN": "mean", "PD": "mean"})
         .reset_index()
         .rename(columns={
             "PTS": f"R{ROLL_N}_PTS",
@@ -154,7 +138,6 @@ def team_rolling_stats(games: pd.DataFrame) -> pd.DataFrame:
         })
     )
 
-    # merge back (wide: home/away)
     games = games.merge(
         roll.rename(columns=lambda c: c + "_HOME" if c.startswith(f"R{ROLL_N}") else c),
         left_on=["HOME_ABBREV", "GAME_DATE"],
@@ -169,16 +152,13 @@ def team_rolling_stats(games: pd.DataFrame) -> pd.DataFrame:
         how="left",
     ).drop(columns="TEAM")
 
-    # convenience diffs (home – away)
     for base in [f"R{ROLL_N}_PTS", f"R{ROLL_N}_WIN", f"R{ROLL_N}_PD"]:
         games[f"{base}_DIFF"] = games[f"{base}_HOME"] - games[f"{base}_AWAY"]
 
     return games
-
-
-# ------------------------------------------------------------------ #
-# 4.  MAIN                                                            #
-# ------------------------------------------------------------------ #
+# ────────────────────────────────────────────────────────────────────
+# 4.  MAIN
+# ────────────────────────────────────────────────────────────────────
 def main() -> None:
     games = load_games()
     odds  = load_odds()
@@ -192,16 +172,29 @@ def main() -> None:
 
     games = team_rolling_stats(games)
 
-    # keep only numeric features + ID columns (for modelling pipeline)
-    feature_cols = [c for c in games.columns if c.startswith(("R", "OPEN_", "IMPLIED_"))]
-    final = games[["GAME_DATE", "HOME_ABBREV", "AWAY_ABBREV", "HOME_WIN"] + feature_cols]
+    # ------------------------------------------------------------------
+    # ⬇️  ADD A SIMPLE, STABLE GAME_ID (date-hash + home-team offset) ⬇️
+    # ------------------------------------------------------------------
+    if "GAME_ID" not in games.columns:
+        # nanoseconds since epoch → int64  (unique per date)
+        ts = games["GAME_DATE"].view("int64")
+        # small deterministic offset so that two games on same date differ
+        offs = games["HOME_ABBREV"].factorize()[0]
+        games.insert(0, "GAME_ID", ts + offs)
+
+    feature_cols = ["GAME_ID"] + [                      #  <── add this
+        c for c in games.columns
+        if c.startswith(("R", "OPEN_", "IMPLIED_"))
+    ]
+
+    final = games[["GAME_ID", "GAME_DATE",
+                   "HOME_ABBREV", "AWAY_ABBREV", "HOME_WIN"] + feature_cols]
 
     final.to_csv(OUTFILE, index=False)
     print(
         f"✅  Saved {len(final):,} rows • {len(feature_cols)} features → "
         f"{OUTFILE.relative_to(ROOT)}"
     )
-
 
 if __name__ == "__main__":
     main()
