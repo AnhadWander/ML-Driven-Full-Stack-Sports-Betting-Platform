@@ -1,6 +1,0 @@
-nba-api
-pandas
-scikit-learn
-joblib
-geopy      
-python-dateutil

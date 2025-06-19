@@ -11,7 +11,7 @@ gb = Pipeline([
     ("imp", SimpleImputer(strategy="median")),
     ("gb",  GradientBoostingClassifier(
         random_state=42, n_estimators=600,
-        learning_rate=0.03, max_depth=4, subsample=0.9))
+        learning_rate=0.03, max_depth=4, subsample=0.9)) 
 ])
 
 xgb = Pipeline([

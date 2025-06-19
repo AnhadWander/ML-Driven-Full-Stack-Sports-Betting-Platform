@@ -1,0 +1,9 @@
+nba-api
+pandas
+scikit-learn
+joblib
+geopy      
+python-dateutil
+fastapi          
+uvicorn[standard] 
+numpy             >=1.26
