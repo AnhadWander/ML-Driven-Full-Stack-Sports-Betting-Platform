@@ -1,36 +1,36 @@
 import { useEffect, useState } from "react";
 import { fetchGameDays, fetchOdds } from "./api";
-import type { GameOdds } from "./types";
-import OddsTable from "./OddsTable";
+import OddsTable from "./components/OddsTable";   // ← path adjusted
+import "./App.css";
 
 export default function App() {
-  const [dates, setDates] = useState<string[]>([]);
+  const [days, setDays] = useState<string[]>([]);
   const [selected, setSelected] = useState<string>("");
-  const [odds, setOdds] = useState<GameOdds[]>([]);
+  const [odds, setOdds] = useState([]);
 
-  // load list of game days once
   useEffect(() => {
     fetchGameDays().then((d) => {
-      setDates(d);
-      if (d.length) setSelected(d[d.length - 1]); // default = latest day
+      setDays(d);
+      if (d.length) setSelected(d[0]);
     });
   }, []);
 
-  // load odds whenever date changes
   useEffect(() => {
-    if (!selected) return;
-    fetchOdds(selected).then(setOdds).catch(console.error);
+    if (selected) fetchOdds(selected).then(setOdds);
   }, [selected]);
 
   return (
-    <main style={{ maxWidth: 980, margin: "2rem auto", fontFamily: "sans-serif" }}>
-      <h1>NBA Model Odds</h1>
+    <main className="max-w-2xl mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-4">NBA Model Odds</h1>
 
-      <label>
-        Pick a date:&nbsp;
-        <select value={selected} onChange={(e) => setSelected(e.target.value)}>
-          <option value="">-- choose --</option>
-          {dates.map((d) => (
+      <label className="block mb-2">
+        <span className="mr-2">Select a game day:</span>
+        <select
+          value={selected}
+          onChange={(e) => setSelected(e.target.value)}
+          className="border px-2 py-1"
+        >
+          {days.map((d) => (
             <option key={d} value={d}>
               {d}
             </option>
