@@ -1,92 +1,105 @@
-# backend/api/routes.py
 from __future__ import annotations
 
-from datetime import date
 from pathlib import Path
-from typing import List, Optional  # ← classic typing
+from typing import List
 
 import numpy as np
 import pandas as pd
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.encoders import jsonable_encoder
-from pydantic import BaseModel
 
-# --------------------------------------------------------------------- #
-# Data                                                                  #
-# --------------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
+# Paths                                                                       #
+# --------------------------------------------------------------------------- #
 BASE_DIR = Path(__file__).resolve().parents[2]
-ODDS_CSV = BASE_DIR / "data" / "processed" / "predicted_odds.csv"
 
-if not ODDS_CSV.exists():
-    raise FileNotFoundError(
-        f"{ODDS_CSV} not found. Generate it with "
-        "`python backend/odds/make_market.py` first."
-    )
+PREDICTED = BASE_DIR / "data" / "processed" / "predicted_odds.csv"
+CLEANED   = BASE_DIR / "data" / "processed" / "cleaned_games.csv"
+META      = BASE_DIR / "data" / "static"    / "team_meta.csv"
 
-_odds = pd.read_csv(ODDS_CSV, parse_dates=["GAME_DATE"])
+for f in (PREDICTED, CLEANED, META):
+    if not f.exists():
+        raise FileNotFoundError(f"Required file missing → {f}")
 
-# --------------------------------------------------------------------- #
-# Pydantic model                                                        #
-# --------------------------------------------------------------------- #
-class GameOdds(BaseModel):
-    game_id: int
-    game_date: date
-    home_abbrev: Optional[str] = None
-    away_abbrev: Optional[str] = None
-    ml_home: Optional[int] = None
-    ml_away: Optional[int] = None
-    p_home: Optional[float] = None
-    p_away: Optional[float] = None
+# --------------------------------------------------------------------------- #
+# Build enriched odds DataFrame                                               #
+# --------------------------------------------------------------------------- #
+odds = pd.read_csv(PREDICTED, parse_dates=["GAME_DATE"])
+games = pd.read_csv(CLEANED,   parse_dates=["GAME_DATE"])
+meta  = pd.read_csv(META, usecols=["TEAM_ID", "TEAM_ABBREV"])
 
+odds["ROW"]  = odds.groupby("GAME_DATE").cumcount()
+games["ROW"] = games.groupby("GAME_DATE").cumcount()
 
-# --------------------------------------------------------------------- #
-# Router                                                                #
-# --------------------------------------------------------------------- #
-router = APIRouter(prefix="/api", tags=["odds"])
-
-
-@router.get("/game-days", summary="Game days")
-def game_days() -> List[str]:
-    """Return list of unique game dates (ISO yyyy-mm-dd)."""
-    return sorted(_odds["GAME_DATE"].dt.date.astype(str).unique())
-
-
-@router.get(
-    "/odds",
-    summary="Odds",
-    response_model=List[GameOdds],
-    description="Return all games + model-priced odds for the requested date.\n"
-                "Query param:  ?date=YYYY-MM-DD",
+odds = odds.merge(
+    games[["GAME_DATE", "ROW", "TEAM_ID_HOME", "TEAM_ID_AWAY"]],
+    on=["GAME_DATE", "ROW"],
+    how="left",
 )
-def odds(date: str = Query(..., pattern=r"\d{4}-\d{2}-\d{2}")):
-    # ------------------------------------------------------------------
-    # Select rows for the requested date
-    # ------------------------------------------------------------------
-    rows = _odds.loc[_odds["GAME_DATE"] == pd.Timestamp(date)]
+
+meta_home = meta.rename(columns={"TEAM_ID": "TEAM_ID_HOME",
+                                 "TEAM_ABBREV": "HOME_ABBREV"})
+meta_away = meta.rename(columns={"TEAM_ID": "TEAM_ID_AWAY",
+                                 "TEAM_ABBREV": "AWAY_ABBREV"})
+
+odds = (
+    odds
+    .merge(meta_home, on="TEAM_ID_HOME", how="left")
+    .merge(meta_away, on="TEAM_ID_AWAY", how="left")
+)
+
+odds = odds.rename(
+    columns={
+        "GAME_ID": "game_id",
+        "GAME_DATE": "game_date",
+        "ML_HOME": "ml_home",
+        "ML_AWAY": "ml_away",
+        "P_HOME": "p_home",
+        "P_AWAY": "p_away",
+        "HOME_ABBREV": "home_abbrev",
+        "AWAY_ABBREV": "away_abbrev",
+    }
+).set_index("game_date")
+
+# --------------------------------------------------------------------------- #
+# FastAPI router                                                              #
+# --------------------------------------------------------------------------- #
+router = APIRouter(prefix="/api")
+
+
+@router.get("/game-days", summary="List all available game dates")
+def game_days() -> List[str]:
+    return sorted(d.date().isoformat() for d in odds.index.unique())
+
+
+@router.get("/odds", summary="Money-line odds for one day")
+def odds_for_day(date: str = Query(..., pattern=r"\d{4}-\d{2}-\d{2}")):
+    try:
+        day = pd.to_datetime(date).normalize()
+    except ValueError:
+        raise HTTPException(status_code=422, detail="Bad date format YYYY-MM-DD expected")
+
+    rows = odds.loc[odds.index == day]
     if rows.empty:
         raise HTTPException(status_code=404, detail=f"No games on {date}")
 
-    # ------------------------------------------------------------------
-    # Rename to the snake_case fields expected by GameOdds
-    # ------------------------------------------------------------------
-    rows = rows.rename(
-        columns={
-            "GAME_ID": "game_id",
-            "GAME_DATE": "game_date",
-            "HOME_ABBREV": "home_abbrev",
-            "AWAY_ABBREV": "away_abbrev",
-            "ML_HOME": "ml_home",
-            "ML_AWAY": "ml_away",
-            "P_HOME": "p_home",
-            "P_AWAY": "p_away",
-        }
-    )
+    # ------------------------------------------------------------------ #
+    # Sanitize for JSON                                                  #
+    # ------------------------------------------------------------------ #
+    rows = rows.replace([np.inf, -np.inf], np.nan)        # ±inf → NaN
+    rows = rows.where(pd.notnull(rows), None)             # NaN → None
 
-    # ------------------------------------------------------------------
-    # Replace NaN/Inf with None so the JSON is valid
-    # ------------------------------------------------------------------
-    rows = rows.replace([np.inf, -np.inf], np.nan).where(
-        pd.notnull(rows), None
-    )
+    # ---- NEW: make sure object columns don't carry NaN ---------------- #
+    rows["home_abbrev"] = rows["home_abbrev"].fillna("")  # ①
+    rows["away_abbrev"] = rows["away_abbrev"].fillna("")  # ②
+    # ------------------------------------------------------------------- #
 
-    return jsonable_encoder(rows.to_dict(orient="records"))
+    payload = rows[
+        ["game_id", "ml_home", "ml_away",
+         "p_home",  "p_away",
+         "home_abbrev", "away_abbrev"]
+    ].reset_index(drop=True)
+
+    print(payload.head().to_dict("records"))              # ③ handy debug
+
+    return jsonable_encoder(payload.to_dict(orient="records"))
