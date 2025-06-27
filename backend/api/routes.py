@@ -8,6 +8,8 @@ import pandas as pd
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.encoders import jsonable_encoder
 
+pd.set_option("future.no_silent_downcasting", True)
+
 # --------------------------------------------------------------------------- #
 # Paths                                                                       #
 # --------------------------------------------------------------------------- #

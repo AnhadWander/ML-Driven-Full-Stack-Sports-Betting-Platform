@@ -1,16 +1,22 @@
+// src/api.ts
 import axios from "axios";
-import type { GameOdds } from "./types";   // 👈  type-only import
+import type { GameOdds } from "./types";
 
 const API_ROOT = "http://127.0.0.1:8000/api";
 
-export async function fetchGameDays(): Promise<string[]> {
-  const { data } = await axios.get<string[]>(`${API_ROOT}/game-days`);
-  return data;
+/*                  ▼ add second param with default */
+export async function fetchOdds(
+  date: string,
+  axiosOpts: Parameters<typeof axios.get>[1] = {}
+): Promise<GameOdds[]> {
+  const res = await axios.get(`${API_ROOT}/odds`, {
+    params: { date },
+    ...axiosOpts,          //  ← lets us pass {signal}
+  });
+  return res.data;
 }
 
-export async function fetchOdds(date: string): Promise<GameOdds[]> {
-  const { data } = await axios.get<GameOdds[]>(`${API_ROOT}/odds`, {
-    params: { date },
-  });
-  return data;
+export async function fetchGameDays(): Promise<string[]> {
+  const res = await axios.get(`${API_ROOT}/game-days`);
+  return res.data;
 }
