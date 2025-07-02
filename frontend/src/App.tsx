@@ -36,7 +36,7 @@ export default function App() {
 /*  Page 1 – date picker                                                  */
 /* ---------------------------------------------------------------------- */
 function DateSelectPage({ days }: { days: string[] }) {
-  const [picked, setPicked] = useState("2024-01-12");   // default choice
+  const [picked, setPicked] = useState("2024-01-20");   // default choice
   const nav = useNavigate();
 
   return (
