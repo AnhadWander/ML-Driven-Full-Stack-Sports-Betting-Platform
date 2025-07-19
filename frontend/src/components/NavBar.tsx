@@ -1,8 +1,9 @@
 import { Link, NavLink } from "react-router-dom";
 
 const tabs = [
-  { to: "/props",  label: "Prop Bets" },
-  { to: "/wallet", label: "My Wallet" },
+  { to: "/day/2024-01-12", label: "OddzBoard" }, // ← new link
+  { to: "/props",          label: "My Betz" },
+  { to: "/wallet",         label: "My Wallet" },
 ];
 
 export default function NavBar() {

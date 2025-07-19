@@ -10,12 +10,12 @@ type Props = {
 };
 
 export default function OddsTable({ date, onLoading, className }: Props) {
-  const [games, setGames]     = useState<GameOdds[]>([]);
-  const [open, setOpen]       = useState(false);
-  const [chosen, setChosen]   = useState<GameOdds | null>(null);
-  const [side, setSide]       = useState<"home" | "away" | null>(null); // ← NEW
+  const [games,  setGames]  = useState<GameOdds[]>([]);
+  const [open,   setOpen]   = useState(false);
+  const [chosen, setChosen] = useState<GameOdds | null>(null);
+  const [side,   setSide]   = useState<"home" | "away" | null>(null);
 
-  /* ────── refetch on date change ────── */
+  /* ───────── fetch whenever the day changes ───────── */
   useEffect(() => {
     setGames([]);
     onLoading?.(true);
@@ -29,44 +29,42 @@ export default function OddsTable({ date, onLoading, className }: Props) {
     return () => ctrl.abort();
   }, [date]);
 
-  /* ────── empty / loading state ────── */
+  /* ───────── empty / loading states ───────── */
   if (!games.length) {
     return (
-      <p className="mt-8 text-lg text-gray-500 italic">
+      <p className="mt-8 text-lg italic text-gray-500">
         {onLoading ? "Loading…" : `No games on ${date}`}
       </p>
     );
   }
 
-  /* ────── render grid ────── */
+  /* ───────── main grid ───────── */
   return (
     <>
-      <section
-        className={`mx-auto grid gap-8 sm:grid-cols-2 xl:grid-cols-3 ${className}`}
-      >
-        {games.map((g) => (
+      <section className={`mx-auto grid gap-8 sm:grid-cols-2 xl:grid-cols-3 ${className}`}>
+        {games.map((g, idx) => (
           <article
-            key={g.game_id}
+            key={`${g.game_id}-${idx}`}          /* unique even if ids repeat */
             className="rounded-lg bg-white shadow transition hover:shadow-md"
           >
-            {/* matchup header */}
+            {/* logos */}
             <div className="flex items-center justify-between p-4 sm:p-6">
               <TeamLogo abbrev={g.home_abbrev} className="mr-2" />
-              <span className="font-semibold text-lg">vs</span>
+              <span className="text-lg font-semibold">vs</span>
               <TeamLogo abbrev={g.away_abbrev} className="ml-2" />
             </div>
 
             {/* odds */}
             <dl className="px-6 text-center text-sm sm:text-base">
               <div className="flex justify-center gap-1 font-mono">
-                <dt className="sr-only">Money-Line</dt>
+                <dt className="sr-only">Money-line</dt>
                 <dd>{g.ml_home}</dd>
                 <span>/</span>
                 <dd>{g.ml_away}</dd>
               </div>
 
               <div className="flex justify-center gap-1">
-                <dt className="sr-only">Win %</dt>
+                <dt className="sr-only">Win&nbsp;%</dt>
                 <dd>{(g.p_home * 100).toFixed(1)}%</dd>
                 <span>/</span>
                 <dd>{(g.p_away * 100).toFixed(1)}%</dd>
@@ -80,22 +78,22 @@ export default function OddsTable({ date, onLoading, className }: Props) {
             {/* bet buttons */}
             <div className="mt-4 flex justify-center gap-4 pb-6">
               <button
+                className="rounded bg-green-600 px-4 py-1 text-white hover:bg-green-700"
                 onClick={() => {
                   setChosen(g);
                   setSide("home");
                   setOpen(true);
                 }}
-                className="rounded bg-green-600 px-4 py-1 text-white hover:bg-green-700"
               >
                 Bet&nbsp;{g.home_abbrev}
               </button>
               <button
+                className="rounded bg-blue-600 px-4 py-1 text-white hover:bg-blue-700"
                 onClick={() => {
                   setChosen(g);
                   setSide("away");
                   setOpen(true);
                 }}
-                className="rounded bg-blue-600 px-4 py-1 text-white hover:bg-blue-700"
               >
                 Bet&nbsp;{g.away_abbrev}
               </button>
@@ -104,12 +102,13 @@ export default function OddsTable({ date, onLoading, className }: Props) {
         ))}
       </section>
 
-      {/* modal */}
+      {/* ───────── bet-placement modal ───────── */}
       <BetModal
         open={open}
         onClose={() => setOpen(false)}
         game={chosen}
         side={side}
+        selectedDate={date}   /* ← pass the calendar day so it stores correctly */
       />
     </>
   );

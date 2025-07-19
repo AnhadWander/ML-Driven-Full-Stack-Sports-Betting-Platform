@@ -1,35 +1,51 @@
 import { Dialog } from "@headlessui/react";
 import { useState } from "react";
+import { v4 as uuid } from "uuid";
+
 import type { GameOdds } from "../types";
 import { useBets } from "../context/BetContext";
-import { v4 as uuid } from "uuid";
 
 type Props = {
   open: boolean;
   onClose: () => void;
   game: GameOdds | null;
   side: "home" | "away" | null;
+  selectedDate: string;
 };
 
-export default function BetModal({ open, onClose, game, side }: Props) {
+export default function BetModal({
+  open,
+  onClose,
+  game,
+  side,
+  selectedDate,
+}: Props) {
   const { addBet } = useBets();
   const [stake, setStake] = useState(10);
 
   /* guard against nulls */
   if (!open || !game || !side) return null;
 
+  /* pick correct club & odds */
   const abbrev = side === "home" ? game.home_abbrev : game.away_abbrev;
   const odds   = side === "home" ? game.ml_home     : game.ml_away;
 
+  /* ─── live-computed payout ─── */
+  const profit  = odds > 0 ? (stake *  odds) / 100
+                           : (stake * 100) / Math.abs(odds);
+  const payout  = stake + profit;
+
+  /* save bet (now stores `team` + `odds`) */
   const submit = () => {
     addBet({
       id: uuid(),
-      date: game.game_date,
-      gameId: game.game_id,
-      team: abbrev,
+      date:        selectedDate,
+      homeAbbrev:  game.home_abbrev,
+      awayAbbrev:  game.away_abbrev,
       stake,
-      odds,
-    });
+      team: abbrev,   // ← NEW
+      odds,           // ← NEW
+    } as any);        // cast to satisfy existing Bet type
     onClose();
   };
 
@@ -41,16 +57,25 @@ export default function BetModal({ open, onClose, game, side }: Props) {
       {/* panel */}
       <div className="fixed inset-0 grid place-content-center p-4">
         <Dialog.Panel className="w-full max-w-sm rounded-lg bg-white p-6 shadow-xl">
-          <Dialog.Title className="text-xl font-bold mb-4">
+          <Dialog.Title className="mb-4 text-xl font-bold">
             Bet on {abbrev}
           </Dialog.Title>
 
-          <p className="mb-4 text-gray-600">
-            Money-line&nbsp;odds: <span className="font-mono">{odds}</span>
+          <p className="mb-2 text-gray-600">
+            Money-line&nbsp;odds:&nbsp;
+            <span className="font-mono">{odds}</span>
           </p>
 
-          <label className="block mb-4">
-            <span className="text-sm font-medium text-gray-700">Stake ($)</span>
+          {/* live payout */}
+          <p className="mb-6 text-sm text-emerald-700">
+            Potential&nbsp;return:&nbsp;
+            <span className="font-semibold">${payout.toFixed(2)}</span>
+          </p>
+
+          <label className="block mb-6">
+            <span className="text-sm font-medium text-gray-700">
+              Stake&nbsp;($)
+            </span>
             <input
               type="number"
               min={1}
@@ -71,7 +96,7 @@ export default function BetModal({ open, onClose, game, side }: Props) {
               onClick={submit}
               className="rounded bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
             >
-              Confirm Bet
+              Confirm&nbsp;Bet
             </button>
           </div>
         </Dialog.Panel>

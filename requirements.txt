@@ -7,3 +7,12 @@ python-dateutil
 fastapi          
 uvicorn[standard] 
 numpy             >=1.26
+itsdangerous>=2.1          # session signing
+authlib>=1.2               # OAuth 2 client
+python-dotenv>=1.0         # load GOOGLE_CLIENT_ID etc. from .env
+httpx>=0.25
+authlib[client]
+python-jose[cryptography]
+python-dotenv
+httpx
+
