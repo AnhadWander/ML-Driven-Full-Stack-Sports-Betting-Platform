@@ -13,9 +13,9 @@ export type Bet = {
   homeAbbrev: string;
   awayAbbrev: string;
   stake: number;
-  /* optional extras that other pages might show */
+  /* extras other pages might need */
   gameId?: number | string;
-  team?: string;           // side the user picked
+  team?: string;          // team the user picked
   odds?: number;
 };
 
@@ -54,8 +54,8 @@ function reducer(state: State, action: Action): State {
 
 /* ─────────── contexts ─────────── */
 
-const BetCtx          = createContext<State | null>(null);
-const BetDispatchCtx  = createContext<((a: Action) => void) | null>(null);
+const BetCtx         = createContext<State | null>(null);
+const BetDispatchCtx = createContext<((a: Action) => void) | null>(null);
 
 /* ─────────── provider ─────────── */
 
@@ -79,23 +79,20 @@ export function useBetStore() {
   if (!state || !dispatch) throw new Error("BetProvider missing");
 
   return {
-    /** array of current bets */
+    /** list of current bets */
     bets: state.bets,
 
-    /** add a new bet */
-    addBet: (bet: Bet) => dispatch({ type: "add", bet }),
+    /** aggregate helpers */
+    lockedAmount: state.bets.reduce((sum, b) => sum + b.stake, 0),
 
-    /** change only the stake of a bet */
-    updateBet: (id: string, stake: number) =>
-      dispatch({ type: "update", id, stake }),
-
-    /** remove a bet completely */
-    removeBet: (id: string) => dispatch({ type: "remove", id }),
-
-    /** wipe all bets */
-    clear: () => dispatch({ type: "clear" }),
+    /** CRUD actions */
+    addBet: (bet: Bet)          => dispatch({ type: "add", bet }),
+    updateBet: (id: string, s: number) =>
+      dispatch({ type: "update", id, stake: s }),
+    removeBet: (id: string)     => dispatch({ type: "remove", id }),
+    clear: ()                   => dispatch({ type: "clear" }),
   };
 }
 
-/* 〰️ legacy alias — keeps older components happy */
+/* legacy alias for older components */
 export const useBets = useBetStore;
