@@ -245,6 +245,8 @@ HoopBetz uses **Google OAuth 2.0** via the `Authlib` and `python-jose` libraries
 - JWT is stored client-side and used for subsequent API calls.
 - Session support is enabled with `SessionMiddleware` and token verification guards.
 
+---
+
 ## 🖥️ Frontend
 
 The HoopBetz frontend is a sleek, responsive Single Page Application (SPA) built with a modern React + Vite + TypeScript stack. It delivers a fast, dynamic, and sportsbook-style betting experience with clean UI, smooth UX flows, and full support for stateful interactions — all without requiring a backend round-trip for most UI events.
