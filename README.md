@@ -208,6 +208,50 @@ While most commercial sportsbooks (e.g., DraftKings, FanDuel, Bet365) **do not p
 
 ---
 
+## 🧱 Backend Architecture & API Design
+
+The backend of HoopBetz is built with **FastAPI**, a modern Python web framework known for its speed, automatic documentation, and native support for async programming. It acts as the backbone of the application—managing authentication, serving predictions, routing requests, and simulating betting markets.
+
+### 🔧 Technologies Used
+
+| **Component**      | **Technology**         | **Purpose**                                                               |
+|--------------------|------------------------|---------------------------------------------------------------------------|
+| Web Framework      | FastAPI                | High-performance async API server with automatic docs (Swagger/OpenAPI)  |
+| ASGI Server        | Uvicorn                | Production-ready server to host FastAPI apps                             |
+| Auth Middleware    | Authlib + python-jose  | Secure Google OAuth 2.0 login and JWT token handling                     |
+| Odds Engine        | Custom market maker    | Generates probability-based moneyline odds from model output             |
+| Data Serving       | pandas / numpy         | Loads and transforms pre-scored ML output (e.g., `odds_2023.csv`)        |
+| Environment Mgmt   | Python `.env` + Pydantic | Centralized config and secure key injection                             |
+
+---
+
+### 📁 Backend Files Overview
+
+| **File**           | **Role**                                                                 |
+|--------------------|--------------------------------------------------------------------------|
+| `main.py`          | Initializes the FastAPI app, includes router registration and CORS setup |
+| `auth.py`          | Handles Google OAuth 2.0 login, session management, and JWT creation     |
+| `routes.py`        | API endpoints: `/game-days`, `/odds`, and dynamic props routing          |
+| `make_market.py`   | Generates American-style moneyline odds based on model probabilities     |
+| `odds_tester.py`   | Utility script to test odds formatting and probability edge cases        |
+
+---
+
+### 🔐 Authentication System
+
+HoopBetz uses **Google OAuth 2.0** via the `Authlib` and `python-jose` libraries.
+
+- When a user signs in with Google, their credentials are verified and converted into a signed **JWT token**.
+- JWT is stored client-side and used for subsequent API calls.
+- Session support is enabled with `SessionMiddleware` and token verification guards.
+
+```python
+@router.get("/login")
+async def login(request: Request):
+    redirect_uri = request.url_for("auth_callback")
+    return await oauth.google.authorize_redirect(request, redirect_uri)
+
+
 
 
 
