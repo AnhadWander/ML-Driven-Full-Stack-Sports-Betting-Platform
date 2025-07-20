@@ -113,7 +113,7 @@ A breakdown of every data and ML-related layer used in HoopBetz, including tooli
 ---
 
 
-## 📊 Model Evaluation Summary
+## Model Evaluation Summary
 
 To rigorously assess our machine learning model's ability to predict NBA game outcomes, we conducted **30 rolling evaluations** using 50-game blocks from the 2021–2024 seasons.
 
@@ -121,7 +121,7 @@ Each run provides key classification metrics and a confusion matrix, helping us 
 
 ---
 
-### 📈 Average Performance Across 30 Runs
+### Average Performance Across 30 Runs
 
 | **Metric**    | **Average** | **Std. Deviation** | **Definition**                                                                 |
 |---------------|-------------|--------------------|---------------------------------------------------------------------------------|
@@ -135,7 +135,7 @@ These metrics indicate a **well-performing binary classifier**, with especially 
 
 To better understand the evolution of our model’s performance across the 30 evaluation runs, we generated a visual comparison of the three most critical metrics: **Accuracy**, **F1 Score**, and **ROC-AUC**.
 
-#### 📍 Visual Summary – 30 Evaluation Blocks
+#### Visual Summary – 30 Evaluation Blocks
 
 ![Model Performance Trend](backend/ml/HoopBetzModelGraph.png)
 
@@ -154,11 +154,8 @@ The model shows:
 
 ---
 
-> 🧠 This graph validates that HoopBetz's predictive engine isn't just accurate — it's reliable across different NBA seasons and game contexts.
 
----
-
-### 📊 How Does HoopBetz Compare to Real-World Sportsbooks?
+###  How Does HoopBetz Compare to Real-World Sportsbooks?
 
 While most commercial sportsbooks (e.g., DraftKings, FanDuel, Bet365) **do not publicly disclose** the accuracy or precision of their prediction models, industry estimates and published research provide benchmarks that help contextualize HoopBetz’s performance.
 
@@ -172,11 +169,11 @@ While most commercial sportsbooks (e.g., DraftKings, FanDuel, Bet365) **do not p
 
 **What sets HoopBetz apart:**
 
-- ✅ Transparent and reproducible pipeline  
-- ✅ Full access to evaluation metrics (F1, ROC-AUC, confusion matrices)  
-- ✅ Trained on actual historical odds, injuries, and advanced stats  
-- ✅ Provides **model confidence** (e.g., `p_home`, `p_away`) rather than just raw picks  
-- ✅ Designed to serve real-time model-backed betting experiences (not just predictions)
+- Transparent and reproducible pipeline  
+- Full access to evaluation metrics (F1, ROC-AUC, confusion matrices)  
+- Trained on actual historical odds, injuries, and advanced stats  
+- Provides **model confidence** (e.g., `p_home`, `p_away`) rather than just raw picks  
+- Designed to serve real-time model-backed betting experiences (not just predictions)
 
 ---
 
