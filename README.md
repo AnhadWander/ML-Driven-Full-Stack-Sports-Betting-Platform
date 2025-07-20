@@ -150,11 +150,11 @@ The model shows:
 
 ---
 
-### 🧠 Why the HoopBetz Model Performs So Well
+### Why the HoopBetz Model Performs So Well
 
 The success of the HoopBetz model lies in its **depth of features** and **context-aware design**. Unlike traditional models that rely on simplistic win/loss trends or aggregated stats, HoopBetz leverages a **rich, multi-dimensional feature set** for each game.
 
-#### ✅ Key Factors Behind Model Performance:
+#### Key Factors Behind Model Performance:
 
 - **Player vs. Opponent Stats**  
   Incorporates how specific players historically perform against certain teams and defensive schemes.
@@ -204,11 +204,11 @@ While most commercial sportsbooks (e.g., DraftKings, FanDuel, Bet365) **do not p
 
 ---
 
-## 🧱 Backend Architecture & API Design
+## Backend Architecture & API Design
 
 The backend of HoopBetz is built with **FastAPI**, a modern Python web framework known for its speed, automatic documentation, and native support for async programming. It acts as the backbone of the application—managing authentication, serving predictions, routing requests, and simulating betting markets.
 
-### 🔧 Technologies Used
+### Technologies Used
 
 | **Component**      | **Technology**         | **Purpose**                                                               |
 |--------------------|------------------------|---------------------------------------------------------------------------|
@@ -221,7 +221,7 @@ The backend of HoopBetz is built with **FastAPI**, a modern Python web framework
 
 ---
 
-### 📁 Backend Files Overview
+### Backend Files Overview
 
 | **File**           | **Role**                                                                 |
 |--------------------|--------------------------------------------------------------------------|
@@ -233,7 +233,7 @@ The backend of HoopBetz is built with **FastAPI**, a modern Python web framework
 
 ---
 
-### 🔐 Authentication System
+### Authentication System
 
 HoopBetz uses **Google OAuth 2.0** via the `Authlib` and `python-jose` libraries.
 
@@ -243,11 +243,11 @@ HoopBetz uses **Google OAuth 2.0** via the `Authlib` and `python-jose` libraries
 
 ---
 
-## 🖥️ Frontend
+## Frontend
 
 The HoopBetz frontend is a sleek, responsive Single Page Application (SPA) built with a modern React + Vite + TypeScript stack. It delivers a fast, dynamic, and sportsbook-style betting experience with clean UI, smooth UX flows, and full support for stateful interactions — all without requiring a backend round-trip for most UI events.
 
-### 🔧 Technologies Used
+### Technologies Used
 
 - **React 18.x** with **Vite 5.x** for rapid development, fast hot module replacement, and a modern tooling experience.
 - **TypeScript 5.x** for static typing and safer code, minimizing runtime errors.
@@ -256,11 +256,11 @@ The HoopBetz frontend is a sleek, responsive Single Page Application (SPA) built
 - **Headless UI 1.x** for accessible and reusable dialog and transition components, used across modals.
 - **uuid 9.x** to generate unique client-side IDs for temporary bets.
 
-### 💼 State Management
+### State Management
 
 State is managed via a custom `React.Context` and `useReducer` setup (`BetContext` and `WalletContext`) — giving localized state management for user-placed bets, wallet balances, edit/delete modals, and more. This architecture enables a future upgrade to full user account storage via a backend.
 
-### ✨ Key Pages & Components
+### Key Pages & Components
 
 - **Landing.tsx**: Homepage with call-to-action and onboarding.
 - **Login.tsx**: OAuth2-based Google sign-in and auth redirect.
@@ -270,7 +270,7 @@ State is managed via a custom `React.Context` and `useReducer` setup (`BetContex
 - **MyBets.tsx**: Bet history overview and tracking.
 - **api.ts**: Centralized API utility to fetch odds, game days, and handle auth tokens securely.
 
-### 🛠️ UI & UX Enhancements
+### UI & UX Enhancements
 
 - **Backdrop blur**, gradients, and hover transitions for a polished aesthetic.
 - **Modal-driven editing & confirmation flows** for intuitive user interaction.
@@ -284,16 +284,16 @@ The frontend is designed to be modular and extensible — easily adaptable to re
 
 ---
 
-## ✅ Conclusion
+## Conclusion
 
 HoopBetz represents a fully integrated, end-to-end NBA betting platform — combining the power of machine learning, real-time data analysis, and modern web development into a clean and production-ready experience.
 
 From **ML-driven odds generation** to a **reactive front-end sportsbook**, every part of the stack has been carefully designed for:
 
-- 🔍 **Transparency** — Open source model evaluation, confusion matrices, and metric breakdowns
-- 🧠 **Intelligence** — In-depth feature engineering and context-aware predictions (injuries, matchups, slumps, etc.)
-- ⚙️ **Scalability** — Clean API boundaries, typed interfaces, and containerized deployment pathways
-- 💡 **User Experience** — Smooth UI flows, instant feedback, and wallet tracking with bet slip editing
+-  **Transparency** — Open source model evaluation, confusion matrices, and metric breakdowns
+-  **Intelligence** — In-depth feature engineering and context-aware predictions (injuries, matchups, slumps, etc.)
+-  **Scalability** — Clean API boundaries, typed interfaces, and containerized deployment pathways
+-  **User Experience** — Smooth UI flows, instant feedback, and wallet tracking with bet slip editing
 
 Whether you're placing a bet, exploring historical game days, or analyzing model performance — HoopBetz offers a **data-first, user-focused betting simulation** with real engineering behind the scenes.
 
