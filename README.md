@@ -24,8 +24,20 @@
 ## Why HoopBetz?
 **HoopBetz** turns raw NBA game logs into actionable money-line odds, lets users log in with Google, place bets with mock currency, and track their wagers in real-time — all wrapped in a responsive, Tailwind-styled UI.
 
-It is equal parts **data engineering pipeline**, **ML experimentation suite**, **REST API**, and **SPA**.  
-Recruiters: this repo is my “full-stack in public” proof-of-work.
+HoopBetz began as a lightweight proof‑of‑concept for serving ML‑generated NBA money‑line odds over a friendly web UI.
+It has since grown into a full‑blown betting experience:
+
+Modern, reactive front‑end that feels like a polished sportsbook
+
+Historical date selector → explore any game day since 2010
+
+Google OAuth 2.0 sign‑in & session management
+
+Virtual wallet, bet slip, editable bet cards
+
+Expandable to props / parlays thanks to a clean API boundary
+
+100 % typed (FastAPI + Pydantic & React + TS)
 
 ---
 
