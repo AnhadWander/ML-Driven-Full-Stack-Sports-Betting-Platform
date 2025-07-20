@@ -1,5 +1,4 @@
-# ML-Driven-Full-Stack-Sports-Betting-Platform
-# **HoopBetz 🏀💸**  
+# HoopBetz 🏀💸 - ML-Driven-Full-Stack-Sports-Betting-Platform 
 *An end-to-end, machine-learning-driven NBA sports-betting platform*
 
 <details>
