@@ -108,8 +108,6 @@ A breakdown of every data and ML-related layer used in HoopBetz, including tooli
 |                             | MLflow                                               | 2.x                        | Experiment tracking and model registry                                               | Each run tagged with Git SHA and data snapshot ID                                     |
 | **Batch Scoring**           | Airflow DAG (`Celery` executor)                     | 2.9                        | After training, score every matchup in season → generate `ml_home`, `ml_away` CSV    | Outputs dropped into `backend/data/odds_<season>.csv`, consumed by `/api/odds`       |
 | **Model Serving (future)**  | FastAPI micro-service with `onnxruntime`            | 0.111 / 1.18               | Serve real-time odds predictions during live season                                  | Keeps main API lean; model weights can auto-refresh via MLflow registry              |
-| **Data Versioning**         | DVC + remote S3 bucket                               | 3.x                        | Pins raw datasets and model artifacts to Git commits                                 | Enables reproducibility and versioned odds generation                                 |
-| **Monitoring**              | Evidently AI dashboards                              | 0.5                        | Detects data drift (e.g. injury spikes, rule changes)                                | Sends Slack alerts; triggers automated retraining via Airflow DAG                    |
 
 
 
