@@ -42,7 +42,7 @@ Recruiters: this repo is my “full-stack in public” proof-of-work.
 
 ---
 
-## ▶️ Quick start
+## How to setup
 
 ```bash
 # 1. clone + cd
