@@ -154,6 +154,37 @@ The model shows:
 
 ---
 
+### 🧠 Why the HoopBetz Model Performs So Well
+
+The success of the HoopBetz model lies in its **depth of features** and **context-aware design**. Unlike traditional models that rely on simplistic win/loss trends or aggregated stats, HoopBetz leverages a **rich, multi-dimensional feature set** for each game.
+
+#### ✅ Key Factors Behind Model Performance:
+
+- **Player vs. Opponent Stats**  
+  Incorporates how specific players historically perform against certain teams and defensive schemes.
+
+- **Player vs. Player Matchups**  
+  Captures micro-dynamics between star matchups (e.g., guards guarding guards), not just team-level data.
+
+- **Team vs. Team History**  
+  Accounts for recurring trends in team clashes — rivalries, blowouts, upsets — over multiple seasons.
+
+- **Injury Reports & Substitutions**  
+  Real-time updates on player injuries and rotations drastically impact outcome probabilities.
+
+- **Player Slumps & Hot Streaks**  
+  Considers recent form, usage rate changes, and shooting efficiency over trailing 5–10 games.
+
+- **Location Context**  
+  Home-court advantage, travel fatigue, time-zone shifts, and back-to-back games all factor into predictions.
+
+- **Dozens More**  
+  Including pace of play, offensive/defensive rating deltas, foul trends, shot location efficiency, and adjusted ELO.
+
+This detailed, context-aware approach allows the model to go **far beyond the capabilities of betting lines or Elo-only systems**, producing predictions that are **statistically sound and situationally intelligent**.
+
+---
+
 
 ###  How Does HoopBetz Compare to Real-World Sportsbooks?
 
