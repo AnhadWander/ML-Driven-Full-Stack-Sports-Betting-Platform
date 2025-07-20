@@ -42,8 +42,37 @@ Recruiters: this repo is my “full-stack in public” proof-of-work.
 
 ---
 
+## ▶️ Quick start
+
+```bash
+# 1. clone + cd
+git clone https://github.com/your‑handle/hoopbetz.git
+cd hoopbetz
+
+# 2. backend ‑‑ Python 3.9‑3.11
+python -m venv .venv
+source .venv/bin/activate         # Windows: .venv\Scripts\activate
+pip install -r backend/requirements.txt
+
+# 3. frontend
+cd frontend
+npm i       # or `pnpm i` / `yarn`
+
+# 4. copy env template and paste your Google creds
+cp .env.sample .env
+# → edit .env with your GOOGLE_CLIENT_ID / SECRET
+
+# 5. two terminals
+# ── terminal A ──
+uvicorn backend.api.main:app --reload
+
+# ── terminal B ──
+npm run dev            # default http://localhost:5173
+```
+---
+
 ## Architecture diagram
-```mermaid
+mermaid
 flowchart LR
   subgraph Frontend (Vite + React)
     A[Landing\npage] --> B[Odds\nDashboard]
