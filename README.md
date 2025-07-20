@@ -6,7 +6,7 @@
 <summary><strong>Table&nbsp;of&nbsp;Contents</strong></summary>
 
 1. [Why HoopBetz?](#why-hoopbetz)  
-2. [Tech-stack at a glance](#tech-stack-at-a-glance)  
+2. [Tech-stack](#tech-stack)  
 3. [Architecture diagram](#architecture-diagram)  
 4. [From idea → production – the journey](#from-idea-→-production--the-journey)  
 5. [Data pipeline & ML methodology](#data-pipeline--ml-methodology)  
@@ -38,17 +38,32 @@ It has since grown into a full‑blown betting experience:
 
 ---
 
-## Tech-stack at a glance
+## Tech-stack
 
-| Layer | Highlights |
-|-------|------------|
-| **Data & ML** | Python 3.11 • *Pandas* for scraping/cleaning/feature-eng • *scikit-learn* & *XGBoost* for model stacking • hyper-parameter sweeps with *Optuna* • rolling-window evaluation • persisted models with *joblib* |
-| **Backend** | FastAPI • Uvicorn/uvloop • Pydantic v2 • Authlib (OAuth 2.0) • Jose (JWT) • gunicorn (prod) |
-| **Frontend** | React 18 • Vite • TypeScript • React-Router v6 • Zustand store • Tailwind CSS • Headless UI & Heroicons |
-| **Tooling** | Pre-commit hooks • Ruff & Black • Vitest & React Testing Library • GitHub Actions CI • Docker Compose |
-| **DevOps** | Poetry for dependency management • dotenv for secrets • CORS middleware • Nginx reverse-proxy (prod) |
-| **Cloud services** | Google Cloud OAuth credentials • GitHub Container Registry • Fly.io for preview apps |
 
+| **Layer / Domain** | **Technology (+ key packages)**         | **Version (typical)**     | **Role in HoopBetz**                               | **Notes / Rationale**                                 |
+|--------------------|-----------------------------------------|----------------------------|----------------------------------------------------|--------------------------------------------------------|
+| **Frontend – SPA** | React (with Vite)                       | 18.x / Vite 5.x            | Core UI runtime & dev server                       | Vite = fast HMR & TypeScript support                   |
+|                    | TypeScript                              | 5.x                        | Type-safe component code                           | Eliminates many runtime bugs                           |
+|                    | Tailwind CSS                            | 3.x                        | Utility-first styling                              | Rapid responsive design                                |
+|                    | Headless UI                             | 1.x                        | Accessible dialog & menu primitives                | Powers BetModal, Edit/Delete modals                    |
+|                    | React Router DOM                        | 6.22 (“future flags”)      | Client-side routing                                | Nested routes: `/`, `/day/:dt`, `/my-bets`, etc.       |
+|                    | uuid                                    | 9.x                        | Generates client bet IDs                           | Used in BetModal                                       |
+| **State + UX**     | Custom BetContext (React Context + Reducer) | –                      | Tracks local bets, edit/delete                     | Pure client state until full user account system added |
+| **Backend (API)**  | FastAPI                                 | 0.111.x                    | REST endpoints, OpenAPI docs                       | `/api/game-days`, `/api/odds`, `/auth/*`               |
+|                    | Uvicorn + uvloop                        | 0.29.x                     | ASGI server                                        | `uvicorn backend.api.main:app --reload`                |
+|                    | Authlib                                 | 1.x                        | OAuth 2 / OIDC flow                                | Wraps Google OAuth in `auth.py`                        |
+|                    | python-jose                             | 3.x                        | Issue & verify JWTs                                | Generates `app_jwt` after Google login                 |
+|                    | itsdangerous                            | 2.x                        | Session signing (Starlette)                        | Required by `SessionMiddleware`                        |
+|                    | pandas + numpy                          | 2.x / 2.x                  | Loads historical odds CSVs                         | Used in `/api/odds` route                              |
+| **Data / ML**      | Pre-trained odds model outputs (CSV / Parquet) | –                   | Provide `ml_home`, `p_home`, etc.                  | Model itself can live in separate repo                 |
+| **Auth / Identity**| Google Cloud OAuth 2.0 Client           | n/a                        | External IdP for “Sign in with Google”             | JavaScript origin: `http://localhost:5173`<br>Authorized redirect: `http://localhost:8000/auth/google/callback` |
+| **Dev Tooling**    | Prettier / ESLint                       | latest                     | Code formatting & linting                          | Optional but recommended                               |
+|                    | pyenv / virtualenv                      | 3.9+                       | Python version management                          | `.venv` activated before dev                           |
+| **Testing**        | Jest + React Testing Library            | –                          | Component tests                                    | Snapshot & interaction tests                           |
+|                    | Pytest                                  | –                          | API unit / integration tests                       | Use `httpx.AsyncClient` for FastAPI                    |
+| **Deployment (future)** | Docker (+ docker-compose)         | n/a                        | Containerize frontend & backend                    | Multi-stage build → slim images                        |
+|                    | (Cloud of choice)                       | –     
 ---
 
 ## How to setup
