@@ -110,10 +110,43 @@ A breakdown of every data and ML-related layer used in HoopBetz, including tooli
 | **Model Serving (future)**  | FastAPI micro-service with `onnxruntime`            | 0.111 / 1.18               | Serve real-time odds predictions during live season                                  | Keeps main API lean; model weights can auto-refresh via MLflow registry              |
 
 
+---
+
+
+## 📊 Model Evaluation Summary
+
+To rigorously assess our machine learning model's ability to predict NBA game outcomes, we conducted **30 rolling evaluations** using 50-game blocks from the 2021–2024 seasons.
+
+Each run provides key classification metrics and a confusion matrix, helping us analyze performance over time and detect trends or inconsistencies.
+
+---
+
+### 🧪 What the Metrics Mean
+
+| **Metric**    | **Definition**                                                                 |
+|---------------|---------------------------------------------------------------------------------|
+| Accuracy      | Percentage of correct predictions across all games                             |
+| Precision     | Proportion of predicted winners that were correct (`TP / (TP + FP)`)           |
+| Recall        | Proportion of actual winners correctly predicted (`TP / (TP + FN)`)            |
+| F1 Score      | Harmonic mean of Precision and Recall; balances false positives and negatives  |
+| ROC-AUC       | Measures the model's ability to distinguish between classes (closer to 1 = better) |
+| Confusion Matrix | Shows true/false positives and negatives in a 2x2 format                     |
+
+---
+
+### 📈 Average Performance Across 30 Runs
+
+| Metric        | Average | Std. Deviation |
+|---------------|---------|----------------|
+| Accuracy      | 0.722   | ± 0.069        |
+| Precision     | 0.729   | ± 0.091        |
+| Recall        | 0.789   | ± 0.078        |
+| F1 Score      | 0.754   | ± 0.068        |
+| ROC-AUC       | 0.797   | ± 0.069        |
+
+These metrics indicate a **well-performing binary classifier**, with especially strong recall and ROC-AUC scores—suggesting the model captures most winners and separates classes effectively.
+
+---
 
 
 
-
-
-
-Ask ChatGPT
