@@ -146,6 +146,29 @@ Each run provides key classification metrics and a confusion matrix, helping us 
 
 These metrics indicate a **well-performing binary classifier**, with especially strong recall and ROC-AUC scores—suggesting the model captures most winners and separates classes effectively.
 
+To better understand the evolution of our model’s performance across the 30 evaluation runs, we generated a visual comparison of the three most critical metrics: **Accuracy**, **F1 Score**, and **ROC-AUC**.
+
+#### 📍 Visual Summary – 30 Evaluation Blocks
+
+![Model Performance Trend](backend/ml/HoopBetzModelGraph.png)
+
+> Each point on the graph represents the performance of the model on a 50-game rolling block between 2021 and 2024.
+
+#### What the graph shows:
+
+- **Accuracy** reflects how often the model correctly predicted the winning team
+- **F1 Score** balances precision and recall — key for avoiding misleading predictions
+- **ROC-AUC** demonstrates the model’s ability to distinguish between the winning and losing teams
+
+The model shows:
+- Consistent **accuracy above 70%** for most blocks
+- Strong **F1 scores**, indicating balance in prediction quality
+- Excellent **ROC-AUC**, often exceeding 0.80, proving good discrimination between classes
+
+---
+
+> 🧠 This graph validates that HoopBetz's predictive engine isn't just accurate — it's reliable across different NBA seasons and game contexts.
+
 ---
 
 ### 📊 How Does HoopBetz Compare to Real-World Sportsbooks?
