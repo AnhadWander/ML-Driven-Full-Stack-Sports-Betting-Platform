@@ -170,8 +170,6 @@ While most commercial sportsbooks (e.g., DraftKings, FanDuel, Bet365) **do not p
 
 ---
 
-> 🔍 Bottom Line: HoopBetz performs **on par or better** than most published or inferred betting systems, and it provides a fully transparent and reproducible framework that no major commercial sportsbook currently offers.
-
 
 
 
