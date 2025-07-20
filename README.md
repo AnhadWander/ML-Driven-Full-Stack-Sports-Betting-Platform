@@ -121,28 +121,15 @@ Each run provides key classification metrics and a confusion matrix, helping us 
 
 ---
 
-### 🧪 What the Metrics Mean
-
-| **Metric**    | **Definition**                                                                 |
-|---------------|---------------------------------------------------------------------------------|
-| Accuracy      | Percentage of correct predictions across all games                             |
-| Precision     | Proportion of predicted winners that were correct (`TP / (TP + FP)`)           |
-| Recall        | Proportion of actual winners correctly predicted (`TP / (TP + FN)`)            |
-| F1 Score      | Harmonic mean of Precision and Recall; balances false positives and negatives  |
-| ROC-AUC       | Measures the model's ability to distinguish between classes (closer to 1 = better) |
-| Confusion Matrix | Shows true/false positives and negatives in a 2x2 format                     |
-
----
-
 ### 📈 Average Performance Across 30 Runs
 
-| Metric        | Average | Std. Deviation |
-|---------------|---------|----------------|
-| Accuracy      | 0.722   | ± 0.069        |
-| Precision     | 0.729   | ± 0.091        |
-| Recall        | 0.789   | ± 0.078        |
-| F1 Score      | 0.754   | ± 0.068        |
-| ROC-AUC       | 0.797   | ± 0.069        |
+| **Metric**    | **Average** | **Std. Deviation** | **Definition**                                                                 |
+|---------------|-------------|--------------------|---------------------------------------------------------------------------------|
+| Accuracy      | 0.722       | ± 0.069            | Percentage of correct predictions across all games                             |
+| Precision     | 0.729       | ± 0.091            | Proportion of predicted winners that were correct (`TP / (TP + FP)`)           |
+| Recall        | 0.789       | ± 0.078            | Proportion of actual winners correctly predicted (`TP / (TP + FN)`)            |
+| F1 Score      | 0.754       | ± 0.068            | Harmonic mean of Precision and Recall; balances false positives and negatives  |
+| ROC-AUC       | 0.797       | ± 0.069            | Measures the model's ability to distinguish between classes (closer to 1 = better) |
 
 These metrics indicate a **well-performing binary classifier**, with especially strong recall and ROC-AUC scores—suggesting the model captures most winners and separates classes effectively.
 
