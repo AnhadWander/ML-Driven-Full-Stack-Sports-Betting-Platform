@@ -43,17 +43,15 @@ It has since grown into a full‑blown betting experience:
 
 | **Layer / Domain** | **Technology (+ key packages)**         | **Version (typical)**     | **Role in HoopBetz**                               | **Notes / Rationale**                                 |
 |--------------------|-----------------------------------------|----------------------------|----------------------------------------------------|--------------------------------------------------------|
-| **Frontend – SPA** | React (with Vite)                       | 18.x / Vite 5.x            | Core UI runtime & dev server                       | Vite = fast HMR & TypeScript support                   |
+| **Frontend**       | React (with Vite)                       | 18.x / Vite 5.x            | Core UI runtime & dev server                       | Vite = fast HMR & TypeScript support                   |
 |                    | TypeScript                              | 5.x                        | Type-safe component code                           | Eliminates many runtime bugs                           |
 |                    | Tailwind CSS                            | 3.x                        | Utility-first styling                              | Rapid responsive design                                |
 |                    | Headless UI                             | 1.x                        | Accessible dialog & menu primitives                | Powers BetModal, Edit/Delete modals                    |
 |                    | React Router DOM                        | 6.22 (“future flags”)      | Client-side routing                                | Nested routes: `/`, `/day/:dt`, `/my-bets`, etc.       |
-|                    | uuid                                    | 9.x                        | Generates client bet IDs                           | Used in BetModal                                       |
 | **State + UX**     | Custom BetContext (React Context + Reducer) | –                      | Tracks local bets, edit/delete                     | Pure client state until full user account system added |
 | **Backend (API)**  | FastAPI                                 | 0.111.x                    | REST endpoints, OpenAPI docs                       | `/api/game-days`, `/api/odds`, `/auth/*`               |
 |                    | Uvicorn + uvloop                        | 0.29.x                     | ASGI server                                        | `uvicorn backend.api.main:app --reload`                |
 |                    | Authlib                                 | 1.x                        | OAuth 2 / OIDC flow                                | Wraps Google OAuth in `auth.py`                        |
-|                    | python-jose                             | 3.x                        | Issue & verify JWTs                                | Generates `app_jwt` after Google login                 |
 |                    | itsdangerous                            | 2.x                        | Session signing (Starlette)                        | Required by `SessionMiddleware`                        |
 |                    | pandas + numpy                          | 2.x / 2.x                  | Loads historical odds CSVs                         | Used in `/api/odds` route                              |
 | **Data / ML**      | Pre-trained odds model outputs (CSV / Parquet) | –                   | Provide `ml_home`, `p_home`, etc.                  | Model itself can live in separate repo                 |
