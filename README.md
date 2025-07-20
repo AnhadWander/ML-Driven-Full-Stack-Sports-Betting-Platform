@@ -7,15 +7,11 @@
 
 1. [Why HoopBetz?](#why-hoopbetz)  
 2. [Tech-stack](#tech-stack)  
-3. [Data & ML Infrastructure](#data-&-ml-infrastructure)  
-4. [From idea → production – the journey](#from-idea-→-production--the-journey)  
-5. [Data pipeline & ML methodology](#data-pipeline--ml-methodology)  
-6. [Backend (⚡ FastAPI + Uvicorn)](#backend-⚡-fastapi--uvicorn)  
-7. [Frontend (⚛ React + Vite + TypeScript)](#frontend-⚛-react--vite--typescript)  
-8. [Authentication – Google OAuth 2.0](#authentication--google-oauth-20)  
-9. [Local setup & deployment](#local-setup--deployment)  
-10. [What I’d improve next](#what-id-improve-next)  
-11. [Wrapping up](#wrapping-up)  
+3. [How to setup](#how-to-setup)  
+4. [Data & ML Infrastructure](#data--ml-infrastructure)  
+5. [Backend Architecture & API Design](#backend-architecture--api-design)  
+6. [Frontend](#frontend)  
+7. [Conclusion](#conclusion)  
 
 </details>
 
