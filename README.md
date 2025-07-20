@@ -7,7 +7,7 @@
 
 1. [Why HoopBetz?](#why-hoopbetz)  
 2. [Tech-stack](#tech-stack)  
-3. [Architecture diagram](#architecture-diagram)  
+3. [Architecture diagram](#Data-&-ML-Infrastructure)  
 4. [From idea → production – the journey](#from-idea-→-production--the-journey)  
 5. [Data pipeline & ML methodology](#data-pipeline--ml-methodology)  
 6. [Backend (⚡ FastAPI + Uvicorn)](#backend-⚡-fastapi--uvicorn)  
@@ -93,23 +93,28 @@ npm run dev            # default http://localhost:5173
 ```
 ---
 
-## Architecture diagram
-mermaid
-flowchart LR
-  subgraph Frontend (Vite + React)
-    A[Landing\npage] --> B[Odds\nDashboard]
-    B --> C[Bet Modal]
-    A --OAuth--> D[Login]
-    D --> B
-    B --> E["/my-bets"]
-  end
+## Data & ML Infrastructure
 
-  subgraph FastAPI ASGI   (Uvicorn)
-    F[/routes.py\n/odds] --REST--> G[(Pandas\nCSV store)]
-    H[/auth.py\nOAuth] --JWT--> A
-    I[ml/rolling_model.pkl] --> F
-  end
+A breakdown of every data and ML-related layer used in HoopBetz, including tooling, responsibilities, and rationale for each decision.
 
-  G --> F
-  I -. joblib .-> F
-  H --Google OpenID--> K[(Google\nAuth Server)]
+| **Layer / Domain**          | **Technology (+ key packages)**                      | **Version (typical)**     | **Role in HoopBetz**                                                                 | **Notes / Rationale**                                                                 |
+|-----------------------------|------------------------------------------------------|----------------------------|--------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------|
+| **Data / ML – Ingestion**   | Python ETL scripts (`pandas 2.x`, `requests`, `httpx`) | –                        | Nightly job downloads NBA box scores, betting lines, and injury reports → dumps clean Parquet files to `/data/raw/YYYY-MM-DD/` | Simple cron or GitHub Action; Parquet retains type fidelity and compression            |
+|                             | DuckDB CLI (optional)                               | 0.10+                      | Ad-hoc SQL over Parquet during development                                           | Zero-setup analytics engine; integrates smoothly with pandas                          |
+| **Feature Store**           | Feast                                                | 0.37                       | Versioned feature registry (per season)                                              | Allows both model training and API to consume the same feature sets offline & online  |
+| **Modeling / Training**     | XGBoost                                              | 2.x                        | Gradient-boosted probability model (`p_home`, `p_away`)                              | Ideal for tabular sports data; fast training with interpretable SHAP values           |
+|                             | scikit-learn                                         | 1.5                        | Pipeline wrapper, `GridSearchCV` for hyperparameter tuning                           | Reproducible transforms → exported as Parquet artifacts                               |
+|                             | MLflow                                               | 2.x                        | Experiment tracking and model registry                                               | Each run tagged with Git SHA and data snapshot ID                                     |
+| **Batch Scoring**           | Airflow DAG (`Celery` executor)                     | 2.9                        | After training, score every matchup in season → generate `ml_home`, `ml_away` CSV    | Outputs dropped into `backend/data/odds_<season>.csv`, consumed by `/api/odds`       |
+| **Model Serving (future)**  | FastAPI micro-service with `onnxruntime`            | 0.111 / 1.18               | Serve real-time odds predictions during live season                                  | Keeps main API lean; model weights can auto-refresh via MLflow registry              |
+| **Data Versioning**         | DVC + remote S3 bucket                               | 3.x                        | Pins raw datasets and model artifacts to Git commits                                 | Enables reproducibility and versioned odds generation                                 |
+| **Monitoring**              | Evidently AI dashboards                              | 0.5                        | Detects data drift (e.g. injury spikes, rule changes)                                | Sends Slack alerts; triggers automated retraining via Airflow DAG                    |
+
+
+
+
+
+
+
+
+Ask ChatGPT
