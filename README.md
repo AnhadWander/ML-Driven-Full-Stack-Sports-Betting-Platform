@@ -245,11 +245,46 @@ HoopBetz uses **Google OAuth 2.0** via the `Authlib` and `python-jose` libraries
 - JWT is stored client-side and used for subsequent API calls.
 - Session support is enabled with `SessionMiddleware` and token verification guards.
 
-```python
-@router.get("/login")
-async def login(request: Request):
-    redirect_uri = request.url_for("auth_callback")
-    return await oauth.google.authorize_redirect(request, redirect_uri)
+## 🖥️ Frontend
+
+The HoopBetz frontend is a sleek, responsive Single Page Application (SPA) built with a modern React + Vite + TypeScript stack. It delivers a fast, dynamic, and sportsbook-style betting experience with clean UI, smooth UX flows, and full support for stateful interactions — all without requiring a backend round-trip for most UI events.
+
+### 🔧 Technologies Used
+
+- **React 18.x** with **Vite 5.x** for rapid development, fast hot module replacement, and a modern tooling experience.
+- **TypeScript 5.x** for static typing and safer code, minimizing runtime errors.
+- **Tailwind CSS 3.x** enables utility-first styling for a responsive and polished UI.
+- **React Router DOM 6.22 (future flags)** to manage nested routes like `/`, `/day/:dt`, `/my-bets`, and `/wallet`.
+- **Headless UI 1.x** for accessible and reusable dialog and transition components, used across modals.
+- **uuid 9.x** to generate unique client-side IDs for temporary bets.
+
+### 💼 State Management
+
+State is managed via a custom `React.Context` and `useReducer` setup (`BetContext` and `WalletContext`) — giving localized state management for user-placed bets, wallet balances, edit/delete modals, and more. This architecture enables a future upgrade to full user account storage via a backend.
+
+### ✨ Key Pages & Components
+
+- **Landing.tsx**: Homepage with call-to-action and onboarding.
+- **Login.tsx**: OAuth2-based Google sign-in and auth redirect.
+- **OddsDashboard.tsx**: Core betting interface showing ML-generated odds for the selected game day.
+- **PropsPage.tsx**: Displays all bets placed, with options to edit or cancel each. Modals powered by Headless UI and styled with Tailwind.
+- **Wallet.tsx**: Manages user bankroll with mock deposits/withdrawals, transaction history, and wallet metrics.
+- **MyBets.tsx**: Bet history overview and tracking.
+- **api.ts**: Centralized API utility to fetch odds, game days, and handle auth tokens securely.
+
+### 🛠️ UI & UX Enhancements
+
+- **Backdrop blur**, gradients, and hover transitions for a polished aesthetic.
+- **Modal-driven editing & confirmation flows** for intuitive user interaction.
+- **Live payout calculations** on odds change or stake modification.
+- **Responsive grid layouts** for bet cards and dashboards across devices.
+- **Custom wallet system** that simulates deposits, tracks locked funds, and shows real-time balance effects.
+
+---
+
+The frontend is designed to be modular and extensible — easily adaptable to real-money platforms, support for props/parlays, or mobile-first design. Every interaction is optimized to be smooth, intentional, and data-driven.
+
+
 
 
 
