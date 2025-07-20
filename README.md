@@ -7,7 +7,7 @@
 
 1. [Why HoopBetz?](#why-hoopbetz)  
 2. [Tech-stack](#tech-stack)  
-3. [Architecture diagram](#Data-&-ML-Infrastructure)  
+3. [Data & ML Infrastructure](#data-&-ml-infrastructure)  
 4. [From idea → production – the journey](#from-idea-→-production--the-journey)  
 5. [Data pipeline & ML methodology](#data-pipeline--ml-methodology)  
 6. [Backend (⚡ FastAPI + Uvicorn)](#backend-⚡-fastapi--uvicorn)  
@@ -92,6 +92,7 @@ uvicorn backend.api.main:app --reload
 npm run dev            # default http://localhost:5173
 ```
 ---
+
 
 ## Data & ML Infrastructure
 
