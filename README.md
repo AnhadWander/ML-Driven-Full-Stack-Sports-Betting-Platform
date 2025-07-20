@@ -5,7 +5,7 @@
 <details>
 <summary><strong>Table&nbsp;of&nbsp;Contents</strong></summary>
 
-1. [Why HoopBetz?](#why-hoopbetz)  
+1. [What is HoopBetz?](#what-is-hoopbetz)  
 2. [Tech-stack](#tech-stack)  
 3. [How to setup](#how-to-setup)  
 4. [Data & ML Infrastructure](#data--ml-infrastructure)  
@@ -17,7 +17,7 @@
 
 ---
 
-## Why HoopBetz?
+## What is HoopBetz?
 **HoopBetz** turns raw NBA game logs into actionable money-line odds, lets users log in with Google, place bets with mock currency, and track their wagers in real-time — all wrapped in a responsive, Tailwind-styled UI.
 
 HoopBetz began as a lightweight proof‑of‑concept for serving ML‑generated NBA money‑line odds over a friendly web UI.  
