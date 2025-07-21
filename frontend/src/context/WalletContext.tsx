@@ -7,10 +7,10 @@ import {
 } from "react";
 
 export type Txn = {
-  id: string;          // uuid
-  ts: string;          // ISO timestamp
+  id: string;          
+  ts: string;         
   note: string;
-  delta: number;       // +credit, –debit
+  delta: number;       
 };
 
 type State   = { txns: Txn[] };
@@ -40,7 +40,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       JSON.parse(localStorage.getItem("wallet") || `{"txns":[]}`) as State
   );
 
-  /* persist to localStorage whenever it changes */
   useEffect(() => {
     localStorage.setItem("wallet", JSON.stringify(state));
   }, [state]);
@@ -54,13 +53,12 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   );
 }
 
-/* ─────────── hooks ─────────── */
 
 export function useWallet() {
   const s = useContext(CtxState);
   if (!s) throw new Error("WalletProvider missing");
   const balance = s.txns.reduce((sum, t) => sum + t.delta, 0);
-  return { txns: s.txns, balance };      // ← now exposes `balance`
+  return { txns: s.txns, balance };     
 }
 
 export function useWalletActions() {

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Evaluate rolling NBA model on historical data.
 
@@ -24,9 +23,7 @@ from sklearn.metrics import (accuracy_score, confusion_matrix, f1_score,
                              precision_score, recall_score, roc_auc_score)
 from sklearn.pipeline import Pipeline
 
-# ---------------------------------------------------------------------------
-# CONFIG
-# ---------------------------------------------------------------------------
+
 DATA_FILE   = Path("data/processed/rolling_features.csv")
 MODEL_OUT   = Path("backend/ml/rolling_model.pkl")
 
@@ -34,15 +31,10 @@ BLOCK_SIZE  = 50
 N_RUNS      = 30
 RANDOM_SEED = 42
 
-DROP_ALWAYS     = ["GAME_DATE", "HOME_WIN"]       # never used for training
-OPTIONAL_DROPS  = ["GAME_ID"]                     # drop if present
+DROP_ALWAYS     = ["GAME_DATE", "HOME_WIN"]       
+OPTIONAL_DROPS  = ["GAME_ID"]                    
 IMPUTE_STRAT    = "median"
-# ---------------------------------------------------------------------------
 
-
-# ---------------------------------------------------------------------------
-# HELPERS
-# ---------------------------------------------------------------------------
 def _safe_drop(df: pd.DataFrame) -> pd.DataFrame:
     """Return numeric features excl. DROP_ALWAYS + OPTIONAL_DROPS (if present)."""
     to_drop = DROP_ALWAYS + [c for c in OPTIONAL_DROPS if c in df.columns]
@@ -96,9 +88,6 @@ def _print_block_results(m: dict[str, float]):
     print()
 
 
-# ---------------------------------------------------------------------------
-# MAIN EVALUATION
-# ---------------------------------------------------------------------------
 def main():
     warnings.filterwarnings("ignore", category=UserWarning, module="sklearn")
 
@@ -106,9 +95,6 @@ def main():
     df.sort_values("GAME_DATE", inplace=True)
     df.reset_index(drop=True, inplace=True)
 
-    # -------------------------------------------------------- #
-    # Single latest-game check
-    # -------------------------------------------------------- #
     train_latest = df.iloc[:-1]
     test_latest  = df.iloc[-1:]
 
@@ -127,9 +113,7 @@ def main():
     print(confusion_matrix(test_latest["HOME_WIN"], y_pred))
     print("-" * 60)
 
-    # -------------------------------------------------------- #
-    # 30 future-window runs (BLOCK_SIZE each)
-    # -------------------------------------------------------- #
+
     rng = np.random.default_rng(RANDOM_SEED)
     start_indices = rng.choice(
         range(len(df) - BLOCK_SIZE),
@@ -143,7 +127,6 @@ def main():
         train = df.iloc[:start]
 
         if train.empty:
-            # not enough past games – skip this window
             continue
 
         pipe = _build_model()
@@ -163,9 +146,7 @@ def main():
         print("Confusion Matrix:")
         print(confusion_matrix(test["HOME_WIN"], y_pred))
 
-    # -------------------------------------------------------- #
-    # Summary stats
-    # -------------------------------------------------------- #
+
     if results:
         print("=" * 60)
         print(f"Averages across {len(results)} runs (block size {BLOCK_SIZE}):")
@@ -176,9 +157,6 @@ def main():
             print(f"{k.upper():9}: {mean(vals):0.3f}  ± {stdev(vals):0.3f}")
         print("=" * 60)
 
-    # -------------------------------------------------------- #
-    # Save full-history model for inference
-    # -------------------------------------------------------- #
     full_pipe = _build_model()
     full_pipe.fit(_safe_drop(df), df["HOME_WIN"])
     MODEL_OUT.parent.mkdir(parents=True, exist_ok=True)
@@ -186,6 +164,5 @@ def main():
     print(f"\n✅  full-history model saved → {MODEL_OUT}")
 
 
-# ---------------------------------------------------------------------------
 if __name__ == "__main__":
     main()

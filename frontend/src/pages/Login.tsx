@@ -6,17 +6,14 @@ export default function Login() {
   const nav = useNavigate();
   const [params] = useSearchParams();
 
-  /* ───────── handle Google callback (token in URL) ───────── */
   useEffect(() => {
     const token = params.get("token");
     if (token) {
-      // ✅ token arrived from backend → store & proceed
       localStorage.setItem("jwt", token);
       nav("/wallet", { replace: true });
     }
   }, [params, nav]);
 
-  /* ───────── helpers ───────── */
   const GOOGLE_AUTH_URL = "http://localhost:8000/auth/google";
 
   return (
@@ -24,12 +21,10 @@ export default function Login() {
       <NavBar />
       <main className="grid min-h-screen place-items-center bg-gradient-to-br from-indigo-600 via-sky-500 to-emerald-400 p-6">
         <div className="w-full max-w-sm rounded-3xl bg-white/90 p-10 shadow-xl backdrop-blur">
-          {/* logo / title */}
           <h2 className="mb-8 text-center text-3xl font-extrabold text-gray-900">
             Welcome&nbsp;to&nbsp;HoopBetz
           </h2>
 
-          {/* Google button */}
           <button
             onClick={() => (window.location.href = GOOGLE_AUTH_URL)}
             className="relative flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white py-2 font-medium shadow-sm transition hover:bg-gray-50 active:scale-95"
@@ -42,7 +37,6 @@ export default function Login() {
             <span className="text-sm text-gray-700">Sign&nbsp;in&nbsp;with&nbsp;Google</span>
           </button>
 
-          {/* divider */}
           <div className="my-6 flex items-center">
             <span className="h-px flex-1 bg-gray-200" />
             <span className="mx-3 text-xs uppercase tracking-wider text-gray-400">
@@ -51,7 +45,6 @@ export default function Login() {
             <span className="h-px flex-1 bg-gray-200" />
           </div>
 
-          {/* classic form (optional fallback) */}
           <form
             onSubmit={(e) => {
               e.preventDefault();

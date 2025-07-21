@@ -19,7 +19,6 @@ if not os.path.exists(RAW):
 df = pd.read_csv(RAW, parse_dates=["date"])
 df = df[(df["regular"] == True) & (df["date"] >= "2022-10-01")].copy()
 
-# --- tag map ----------------------------------------------------------
 MAP2 = {
     "atl": "ATL","bos": "BOS","bro":"BKN","bkn":"BKN",
     "cha": "CHA","chi": "CHI","cle":"CLE","dal":"DAL",
@@ -35,7 +34,6 @@ df["HOME_ABBREV"] = df["home"].str.lower().map(MAP2)
 df["AWAY_ABBREV"] = df["away"].str.lower().map(MAP2)
 df = df.dropna(subset=["HOME_ABBREV","AWAY_ABBREV"])
 
-# --- spread -----------------------------------------------------------
 def signed_spread(r):
     s = r["spread"]
     if pd.isna(s): return None
@@ -44,7 +42,6 @@ def signed_spread(r):
 df["OPEN_SPREAD_HOME"] = df.apply(signed_spread, axis=1)
 df["OPEN_SPREAD_AWAY"] = -df["OPEN_SPREAD_HOME"]
 
-# --- money-line & implied prob ---------------------------------------
 def american_to_prob(x):
     if pd.isna(x): return None
     x = float(x)
@@ -53,7 +50,6 @@ def american_to_prob(x):
 df["IMPLIED_HOME"] = df["moneyline_home"].apply(american_to_prob)
 df["IMPLIED_AWAY"] = df["moneyline_away"].apply(american_to_prob)
 
-# synthesize when missing
 needs_ml = df["IMPLIED_HOME"].isna()
 
 def spread_to_prob(spread_home):
@@ -79,7 +75,6 @@ df["OPEN_ML_AWAY"] = np.where(
         df["IMPLIED_AWAY"].apply(prob_to_american)
 )
 
-# --- output -----------------------------------------------------------
 out = df[[
     "date","HOME_ABBREV","AWAY_ABBREV",
     "OPEN_SPREAD_HOME","OPEN_SPREAD_AWAY",

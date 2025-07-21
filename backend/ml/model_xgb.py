@@ -30,7 +30,6 @@ pipe = Pipeline([
     )),
 ])
 
-# quick CV sanity check
 tscv = TimeSeriesSplit(n_splits=4)
 scores = []
 for train, test in tscv.split(X):

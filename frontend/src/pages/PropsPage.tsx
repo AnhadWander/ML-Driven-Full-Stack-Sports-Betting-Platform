@@ -3,7 +3,6 @@ import { Dialog, Transition } from "@headlessui/react";
 import { useBetStore } from "../context/BetContext";
 import NavBar from "../components/NavBar";
 
-/* ───────── helpers ───────── */
 
 const fmtDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-US", {
@@ -13,7 +12,6 @@ const fmtDate = (iso: string) =>
     year: "numeric",
   });
 
-/** calculate *payout* (stake + profit) from American money-line odds */
 function calcReturn(stake: number, odds: number) {
   if (!odds) return 0;
   return odds > 0
@@ -21,12 +19,10 @@ function calcReturn(stake: number, odds: number) {
     : stake + stake * (100 / Math.abs(odds));
 }
 
-/* ───────────────────────────────────────── */
 
 export default function PropsPage() {
   const { bets, updateBet, removeBet } = useBetStore();
 
-  /* modal state */
   const [editOpen, setEditOpen] = useState(false);
   const [delOpen, setDelOpen] = useState(false);
   const [selected, setSelected] = useState<typeof bets[number] | null>(null);
@@ -44,7 +40,6 @@ export default function PropsPage() {
     <>
       <NavBar />
 
-      {/* ───── background: light radial fog ───── */}
       <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,theme(colors.slate.50)_0%,theme(colors.slate.100)_40%,theme(colors.slate.200)_100%)] px-4 pt-6 pb-16">
         <div className="mx-auto w-full max-w-6xl">
           <h1 className="mt-2 mb-5 text-3xl font-extrabold text-slate-800">
@@ -64,7 +59,6 @@ export default function PropsPage() {
                   key={b.id}
                   className="group relative flex flex-col overflow-hidden rounded-2xl border border-indigo-100/70 bg-white/40 shadow-sm backdrop-blur-md hover:shadow-lg"
                 >
-                  {/* gradient ring */}
                   <span className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-transparent group-hover:ring-indigo-400/40" />
 
                   <div className="flex-1 space-y-4 p-6">
@@ -78,7 +72,6 @@ export default function PropsPage() {
                       {b.awayAbbrev}
                     </h2>
 
-                    {/* pick badge */}
                     {b.team && (
                       <span className="inline-block rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold leading-none text-indigo-600">
                         Pick&nbsp;{b.team}
@@ -92,7 +85,6 @@ export default function PropsPage() {
                       </span>
                     </p>
 
-                    {/* NEW — potential return */}
                     <p className="text-sm text-emerald-700">
                       Returns&nbsp;
                       <span className="font-mono font-semibold">
@@ -102,7 +94,6 @@ export default function PropsPage() {
                     </p>
                   </div>
 
-                  {/* actions */}
                   <div className="flex items-center justify-end gap-2 border-t border-white/30 bg-white/30 px-4 py-3 backdrop-blur-sm">
                     <button
                       onClick={() => openEdit(b)}
@@ -124,7 +115,6 @@ export default function PropsPage() {
         </div>
       </main>
 
-      {/* ──────────────────── Modals ──────────────────── */}
       <EditModal
         open={editOpen}
         close={() => setEditOpen(false)}
@@ -141,7 +131,6 @@ export default function PropsPage() {
   );
 }
 
-/* ───────── Edit & Delete modals ───────── */
 
 type ModalProps = {
   open: boolean;
@@ -149,7 +138,6 @@ type ModalProps = {
   selected: any | null;
 };
 
-/* ---------- Edit Modal ---------- */
 function EditModal({
   open,
   close,
@@ -158,7 +146,6 @@ function EditModal({
 }: ModalProps & { updateBet: (id: string, stake: number) => void }) {
   const [val, setVal] = useState(selected?.stake ?? 0);
 
-  /* reset stake value when a new bet is chosen */
   useEffect(() => {
     setVal(selected?.stake ?? 0);
   }, [selected]);
@@ -212,7 +199,6 @@ function EditModal({
                 />
               </label>
 
-              {/* live return preview */}
               <p className="mt-3 text-sm text-emerald-700">
                 Potential return:&nbsp;
                 <span className="font-mono font-semibold">${potential}</span>
@@ -243,7 +229,6 @@ function EditModal({
   );
 }
 
-/* ---------- Delete Modal (unchanged) ---------- */
 function DeleteModal({
   open,
   close,

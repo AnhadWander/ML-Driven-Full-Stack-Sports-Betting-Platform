@@ -1,4 +1,3 @@
-# backend/ml/ensemble_utils.py
 import numpy as np, joblib
 from pathlib import Path
 from sklearn.base import BaseEstimator, ClassifierMixin
@@ -15,7 +14,6 @@ class ProbAvgEnsemble(BaseEstimator, ClassifierMixin):
         )
         self.models      = [joblib.load(p) for p in self.model_paths]
 
-    # already trained → no-op
     def fit(self, X, y=None):
         return self
 

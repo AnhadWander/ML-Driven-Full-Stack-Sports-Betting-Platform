@@ -16,13 +16,9 @@ export default function OddsDashboard({ days }: Props) {
     <>
       <NavBar />
 
-      {/* ------------------------------------------------------------------ */}
-      {/*  Main page -------------------------------------------------------- */}
-      {/* ------------------------------------------------------------------ */}
-      <main className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#eef2f7] to-[#e2e8f0] p-6">
-        {/* subtle, airy gradient  */}
 
-        {/* Header row */}
+      <main className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#eef2f7] to-[#e2e8f0] p-6">
+
         <section className="mx-auto mb-10 flex max-w-7xl flex-col items-center justify-between gap-4 sm:flex-row">
           <h2 className="text-4xl font-extrabold tracking-tight text-gray-800 drop-shadow-sm">
             Odds for{" "}
@@ -42,7 +38,6 @@ export default function OddsDashboard({ days }: Props) {
           </select>
         </section>
 
-        {/* Existing pretty cards  */}
         <div className="mx-auto max-w-7xl">
           <OddsTable date={dt} />
         </div>

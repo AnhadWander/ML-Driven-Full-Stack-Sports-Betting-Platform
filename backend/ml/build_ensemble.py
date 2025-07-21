@@ -1,4 +1,3 @@
-# build_ensemble.py  (Option B – replace file with this)
 import joblib, numpy as np
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
@@ -6,8 +5,7 @@ from sklearn.ensemble import GradientBoostingClassifier, VotingClassifier
 from xgboost import XGBClassifier
 from pathlib import Path
 
-OUT = Path("backend/ml/ensemble_template.pkl")   # template, not trained
-
+OUT = Path("backend/ml/ensemble_template.pkl")  
 gb  = Pipeline([("imp", SimpleImputer(strategy="median")),
                 ("gb",  GradientBoostingClassifier(random_state=42,
                         n_estimators=600, learning_rate=0.03, max_depth=4,

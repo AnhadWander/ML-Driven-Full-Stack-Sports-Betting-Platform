@@ -1,4 +1,3 @@
-# scripts/clean_game_data.py
 """
 Merge raw game logs into one-row-per-match with home/away suffixes
 and extra columns: TEAM_ID_HOME/AWAY and MIN_HOME/AWAY.
@@ -25,7 +24,6 @@ def main():
     df = load_all_seasons().sort_values("GAME_DATE")
     df["IS_HOME"] = df["MATCHUP"].str.contains("vs").astype(int)
 
-    # keep TEAM_ID + MIN so we can track injuries & travel later
     keep = ["GAME_ID","GAME_DATE","TEAM_ID","TEAM_NAME","WL","MIN",
             "PTS","FG_PCT","FG3_PCT","FT_PCT",
             "OREB","DREB","AST","STL","BLK","TOV","PF","PLUS_MINUS","IS_HOME"]
@@ -38,20 +36,17 @@ def main():
     merged = pd.merge(home, away, on=["GAME_ID","GAME_DATE"])
     merged["HOME_WIN"] = (merged["WL_HOME"]=="W").astype(int)
 
-    # derive REB columns
     merged["REB_HOME"]  = merged["OREB_HOME"] + merged["DREB_HOME"]
     merged["REB_AWAY"]  = merged["OREB_AWAY"] + merged["DREB_AWAY"]
 
     order = [
         "GAME_ID","GAME_DATE","TEAM_ID_HOME","TEAM_ID_AWAY","TEAM_NAME_HOME","TEAM_NAME_AWAY",
         "HOME_WIN",
-        # core stats…
         "PTS_HOME","PTS_AWAY","FG_PCT_HOME","FG_PCT_AWAY","FG3_PCT_HOME","FG3_PCT_AWAY",
         "FT_PCT_HOME","FT_PCT_AWAY","OREB_HOME","OREB_AWAY","DREB_HOME","DREB_AWAY",
         "REB_HOME","REB_AWAY","AST_HOME","AST_AWAY","STL_HOME","STL_AWAY",
         "BLK_HOME","BLK_AWAY","TOV_HOME","TOV_AWAY","PF_HOME","PF_AWAY",
         "PLUS_MINUS_HOME","PLUS_MINUS_AWAY",
-        # minutes (for injury proxy)
         "MIN_HOME","MIN_AWAY"
     ]
     merged = merged[order]

@@ -23,19 +23,15 @@ export default function BetModal({
   const { addBet } = useBets();
   const [stake, setStake] = useState(10);
 
-  /* guard against nulls */
   if (!open || !game || !side) return null;
 
-  /* pick correct club & odds */
   const abbrev = side === "home" ? game.home_abbrev : game.away_abbrev;
   const odds   = side === "home" ? game.ml_home     : game.ml_away;
 
-  /* ─── live-computed payout ─── */
   const profit  = odds > 0 ? (stake *  odds) / 100
                            : (stake * 100) / Math.abs(odds);
   const payout  = stake + profit;
 
-  /* save bet (now stores `team` + `odds`) */
   const submit = () => {
     addBet({
       id: uuid(),
@@ -43,18 +39,16 @@ export default function BetModal({
       homeAbbrev:  game.home_abbrev,
       awayAbbrev:  game.away_abbrev,
       stake,
-      team: abbrev,   // ← NEW
-      odds,           // ← NEW
-    } as any);        // cast to satisfy existing Bet type
+      team: abbrev,   
+      odds,           
+    } as any);        
     onClose();
   };
 
   return (
     <Dialog open={open} onClose={onClose} className="relative z-50">
-      {/* backdrop */}
       <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
 
-      {/* panel */}
       <div className="fixed inset-0 grid place-content-center p-4">
         <Dialog.Panel className="w-full max-w-sm rounded-lg bg-white p-6 shadow-xl">
           <Dialog.Title className="mb-4 text-xl font-bold">
@@ -66,7 +60,6 @@ export default function BetModal({
             <span className="font-mono">{odds}</span>
           </p>
 
-          {/* live payout */}
           <p className="mb-6 text-sm text-emerald-700">
             Potential&nbsp;return:&nbsp;
             <span className="font-semibold">${payout.toFixed(2)}</span>

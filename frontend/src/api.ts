@@ -1,17 +1,15 @@
-// src/api.ts
 import axios from "axios";
 import type { GameOdds } from "./types";
 
 const API_ROOT = "http://127.0.0.1:8000/api";
 
-/*                  ▼ add second param with default */
 export async function fetchOdds(
   date: string,
   axiosOpts: Parameters<typeof axios.get>[1] = {}
 ): Promise<GameOdds[]> {
   const res = await axios.get(`${API_ROOT}/odds`, {
     params: { date },
-    ...axiosOpts,          //  ← lets us pass {signal}
+    ...axiosOpts,         
   });
   return res.data;
 }

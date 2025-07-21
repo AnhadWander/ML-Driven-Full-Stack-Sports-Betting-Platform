@@ -1,27 +1,23 @@
-# backend/api/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
-from .auth import router as auth_router          # ← new router
+from .auth import router as auth_router          
 from .routes import router as odds_router
 
 app = FastAPI(title="NBA-Odds API")
 
-# ───────── middleware ─────────
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],        # dev only – tighten in prod
+    allow_origins=["*"],       
     allow_methods=["GET"],
     allow_headers=["*"],
 )
 
-# session cookies required by Authlib’s OAuth flow
-app.add_middleware(SessionMiddleware, secret_key="CHANGE_ME_SESSION")   # ← NEW
+app.add_middleware(SessionMiddleware, secret_key="CHANGE_ME_SESSION")   
 
-# ───────── routers ─────────
 app.include_router(odds_router)
-app.include_router(auth_router)       # ← NEW
+app.include_router(auth_router)      
 
 
 @app.get("/", include_in_schema=False)

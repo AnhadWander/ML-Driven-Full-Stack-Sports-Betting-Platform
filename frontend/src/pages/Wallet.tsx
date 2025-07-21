@@ -1,4 +1,3 @@
-/* ───────── Wallet.tsx ───────── */
 import { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import NavBar from "../components/NavBar";
@@ -9,23 +8,20 @@ type Tx = {
   id: string;
   type: "deposit" | "withdraw";
   amount: number;
-  dt: string; // ISO
+  dt: string; 
 };
 
 export default function Wallet() {
-  /* pull current bets and derive locked funds */
   const { bets }         = useBetStore();
-  const lockedAmount     = bets.reduce((sum, b) => sum + b.stake, 0); // ← NEW
+  const lockedAmount     = bets.reduce((sum, b) => sum + b.stake, 0);
 
   const [balance, setBalance] = useState(1_000);
   const [txs, setTxs]         = useState<Tx[]>([]);
 
-  /* modal state */
   const [open, setOpen]     = useState(false);
   const [mode, setMode]     = useState<"deposit" | "withdraw">("deposit");
   const [amount, setAmount] = useState(50);
 
-  /* helpers */
   const fmt   = (n: number) => `$${n.toLocaleString()}`;
   const addTx = (t: Tx) => setTxs((prev) => [t, ...prev.slice(0, 19)]);
 
@@ -54,10 +50,8 @@ export default function Wallet() {
     <>
       <NavBar />
 
-      {/* background */}
       <main className="min-h-screen bg-gradient-to-br from-indigo-50 via-sky-50 to-emerald-50 p-6">
         <div className="mx-auto grid max-w-5xl gap-10 lg:grid-cols-2">
-          {/* ── balance card ── */}
           <section className="rounded-3xl bg-white/70 p-8 backdrop-blur shadow-md ring-1 ring-slate-200">
             <h2 className="mb-6 text-3xl font-extrabold text-slate-800">Wallet</h2>
 
@@ -80,7 +74,6 @@ export default function Wallet() {
               />
             </div>
 
-            {/* quick actions */}
             <div className="mt-8 flex flex-wrap gap-3">
               {[
                 { label: "+$50",  m: "deposit",  amt: 50 },
@@ -119,7 +112,6 @@ export default function Wallet() {
             </div>
           </section>
 
-          {/* ── tx history ── */}
           <section className="rounded-3xl bg-white/70 p-8 backdrop-blur shadow-md ring-1 ring-slate-200">
             <h3 className="mb-6 text-xl font-bold text-slate-800">
               Recent&nbsp;Transactions
@@ -156,7 +148,6 @@ export default function Wallet() {
         </div>
       </main>
 
-      {/* ───── modal ───── */}
       <Transition appear show={open} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={() => setOpen(false)}>
           <Transition.Child
@@ -225,7 +216,6 @@ export default function Wallet() {
   );
 }
 
-/* util component */
 function Stat({
   label,
   value,

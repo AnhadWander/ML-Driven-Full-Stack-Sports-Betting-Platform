@@ -15,7 +15,6 @@ export default function OddsTable({ date, onLoading, className }: Props) {
   const [chosen, setChosen] = useState<GameOdds | null>(null);
   const [side,   setSide]   = useState<"home" | "away" | null>(null);
 
-  /* ───────── fetch whenever the day changes ───────── */
   useEffect(() => {
     setGames([]);
     onLoading?.(true);
@@ -29,7 +28,6 @@ export default function OddsTable({ date, onLoading, className }: Props) {
     return () => ctrl.abort();
   }, [date]);
 
-  /* ───────── empty / loading states ───────── */
   if (!games.length) {
     return (
       <p className="mt-8 text-lg italic text-gray-500">
@@ -38,23 +36,20 @@ export default function OddsTable({ date, onLoading, className }: Props) {
     );
   }
 
-  /* ───────── main grid ───────── */
   return (
     <>
       <section className={`mx-auto grid gap-8 sm:grid-cols-2 xl:grid-cols-3 ${className}`}>
         {games.map((g, idx) => (
           <article
-            key={`${g.game_id}-${idx}`}          /* unique even if ids repeat */
+            key={`${g.game_id}-${idx}`}        
             className="rounded-lg bg-white shadow transition hover:shadow-md"
           >
-            {/* logos */}
             <div className="flex items-center justify-between p-4 sm:p-6">
               <TeamLogo abbrev={g.home_abbrev} className="mr-2" />
               <span className="text-lg font-semibold">vs</span>
               <TeamLogo abbrev={g.away_abbrev} className="ml-2" />
             </div>
 
-            {/* odds */}
             <dl className="px-6 text-center text-sm sm:text-base">
               <div className="flex justify-center gap-1 font-mono">
                 <dt className="sr-only">Money-line</dt>
@@ -75,7 +70,6 @@ export default function OddsTable({ date, onLoading, className }: Props) {
               </dd>
             </dl>
 
-            {/* bet buttons */}
             <div className="mt-4 flex justify-center gap-4 pb-6">
               <button
                 className="rounded bg-green-600 px-4 py-1 text-white hover:bg-green-700"
@@ -102,19 +96,17 @@ export default function OddsTable({ date, onLoading, className }: Props) {
         ))}
       </section>
 
-      {/* ───────── bet-placement modal ───────── */}
       <BetModal
         open={open}
         onClose={() => setOpen(false)}
         game={chosen}
         side={side}
-        selectedDate={date}   /* ← pass the calendar day so it stores correctly */
+        selectedDate={date}  
       />
     </>
   );
 }
 
-/* ───────── helper ───────── */
 
 function TeamLogo({
   abbrev,

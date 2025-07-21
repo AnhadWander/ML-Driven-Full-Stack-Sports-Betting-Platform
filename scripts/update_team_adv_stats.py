@@ -1,4 +1,3 @@
-# scripts/update_team_adv_stats.py
 """
 Pull season-to-date Advanced ratings (OFF/DEF/NET/PACE) for every NBA team.
 Writes data/processed/team_adv_<SEASON>.csv
@@ -10,10 +9,10 @@ from nba_api.stats.static import teams
 from nba_api.stats.endpoints import teamdashboardbygeneralsplits
 from requests.exceptions import ReadTimeout, ConnectionError
 
-SEASON = "2024-25"                              # ← change when season rolls
+SEASON = "2024-25"                             
 OUT    = f"data/processed/team_adv_{SEASON}.csv"
 MAX_RETRIES = 3
-PAUSE_SEC   = 0.7                               # ~1 request / 0.7 s ≈ safe
+PAUSE_SEC   = 0.7                              
 
 os.makedirs("data/processed", exist_ok=True)
 
@@ -27,7 +26,7 @@ def fetch_one(team_id: int) -> dict:
         measure_type_detailed_defense="Advanced",
         per_mode_detailed="PerGame",
     )
-    df = dash.get_data_frames()[0]              # overall season row
+    df = dash.get_data_frames()[0]              
     row = df.iloc[0]
     return {
         "TEAM_ID":     team_id,
@@ -55,7 +54,6 @@ for t in teams.get_teams():
                 sleep_for = PAUSE_SEC + random.random() * 0.5
                 print(f"...retry {name} in {sleep_for:.1f}s")
                 time.sleep(sleep_for)
-    time.sleep(PAUSE_SEC)                       # rate-limit pause
-
+    time.sleep(PAUSE_SEC)                       
 pd.DataFrame(records).to_csv(OUT, index=False)
 print("\nSaved →", OUT, "with", len(records), "teams")

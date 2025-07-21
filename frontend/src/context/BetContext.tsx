@@ -5,7 +5,6 @@ import {
   type ReactNode,
 } from "react";
 
-/* ─────────── types ─────────── */
 
 export type Bet = {
   id: string;
@@ -13,9 +12,8 @@ export type Bet = {
   homeAbbrev: string;
   awayAbbrev: string;
   stake: number;
-  /* extras other pages might need */
   gameId?: number | string;
-  team?: string;          // team the user picked
+  team?: string;          
   odds?: number;
 };
 
@@ -27,7 +25,6 @@ type Action =
   | { type: "remove"; id: string }
   | { type: "clear" };
 
-/* ─────────── reducer ─────────── */
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
@@ -52,12 +49,10 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-/* ─────────── contexts ─────────── */
 
 const BetCtx         = createContext<State | null>(null);
 const BetDispatchCtx = createContext<((a: Action) => void) | null>(null);
 
-/* ─────────── provider ─────────── */
 
 export function BetProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, { bets: [] });
@@ -71,7 +66,6 @@ export function BetProvider({ children }: { children: ReactNode }) {
   );
 }
 
-/* ─────────── hooks ─────────── */
 
 export function useBetStore() {
   const state    = useContext(BetCtx);
@@ -79,13 +73,10 @@ export function useBetStore() {
   if (!state || !dispatch) throw new Error("BetProvider missing");
 
   return {
-    /** list of current bets */
     bets: state.bets,
 
-    /** aggregate helpers */
     lockedAmount: state.bets.reduce((sum, b) => sum + b.stake, 0),
 
-    /** CRUD actions */
     addBet: (bet: Bet)          => dispatch({ type: "add", bet }),
     updateBet: (id: string, s: number) =>
       dispatch({ type: "update", id, stake: s }),
@@ -94,5 +85,4 @@ export function useBetStore() {
   };
 }
 
-/* legacy alias for older components */
 export const useBets = useBetStore;

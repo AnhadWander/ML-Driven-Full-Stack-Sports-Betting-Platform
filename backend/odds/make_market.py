@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Price NBA games with the trained ensemble model.
 
@@ -20,7 +19,6 @@ import numpy as np
 import pandas as pd
 from sklearn.isotonic import IsotonicRegression
 
-# ── paths ──────────────────────────────────────────────────────────────
 BASE_DIR   = Path(__file__).resolve().parents[2]
 MODEL_PATH = BASE_DIR / "backend" / "ml" / "rolling_model.pkl"
 CALIB_PATH = BASE_DIR / "backend" / "ml" / "iso_calibrator.pkl"
@@ -29,14 +27,12 @@ OUT_PATH   = BASE_DIR / "data"   / "processed" / "predicted_odds.csv"
 
 NON_FEATURE = {"GAME_ID", "GAME_DATE", "HOME_WIN"}
 
-# ── probability tuning ────────────────────────────────────────────────
-PROB_FLOOR = 0.135          # ↔  +640 / –640
+PROB_FLOOR = 0.135          
 PROB_CEIL  = 0.865
-SHRINK     = 0.90           # 10 % pull toward 0.50
-JITTER_P   = 0.01           # ±1 % probability jitter
-ODD_JITTER = 0.05           # ±5 % money-line jitter  ← NEW
+SHRINK     = 0.90          
+JITTER_P   = 0.01           
+ODD_JITTER = 0.05          
 
-# ── helpers ────────────────────────────────────────────────────────────
 def prob_to_american(p: float) -> int:
     """Convert win probability to American money-line."""
     if not 0 < p < 1:
@@ -57,7 +53,6 @@ def load_or_train_calibrator(y_true: np.ndarray,
     return iso
 
 
-# ── main ───────────────────────────────────────────────────────────────
 def main() -> None:
     p = argparse.ArgumentParser(description="Make NBA betting markets")
     p.add_argument("-m", "--mode", choices=["test", "live"], default="test",
@@ -66,14 +61,12 @@ def main() -> None:
                    help="Earliest GAME_DATE to price")
     args = p.parse_args()
 
-    # artefacts ----------------------------------------------------------
     print(f"Loading model → {MODEL_PATH}")
     model = joblib.load(MODEL_PATH)
 
     print(f"Loading features → {FEAT_PATH}")
     df = pd.read_csv(FEAT_PATH, parse_dates=["GAME_DATE"])
 
-    # row subset ---------------------------------------------------------
     if args.from_date:
         subset = df[df["GAME_DATE"] >= pd.to_datetime(args.from_date)].copy()
     elif args.mode == "live":
@@ -85,7 +78,6 @@ def main() -> None:
         print("❌ Nothing to price – zero rows match the date filter.")
         return
 
-    # model probabilities ------------------------------------------------
     X = subset.drop(columns=NON_FEATURE, errors="ignore").select_dtypes("number")
     raw_p_home = model.predict_proba(X)[:, 1]
 
@@ -93,17 +85,15 @@ def main() -> None:
                                               np.round(raw_p_home)),
                                    raw_p_home)
     p_home = iso.transform(raw_p_home)
-    p_home = 0.5 + SHRINK * (p_home - 0.5)                      # shrink
-    rng_prob = np.random.default_rng(subset["GAME_ID"].values) # deterministic
+    p_home = 0.5 + SHRINK * (p_home - 0.5)                      
+    rng_prob = np.random.default_rng(subset["GAME_ID"].values)
     p_home += rng_prob.uniform(-JITTER_P, JITTER_P, len(p_home))
     p_home = np.clip(p_home, PROB_FLOOR, PROB_CEIL)
     p_away = 1.0 - p_home
 
-    # american odds ------------------------------------------------------
     ml_home = np.array([prob_to_american(p) for p in p_home])
     ml_away = np.array([prob_to_american(p) for p in p_away])
 
-    # ±5 % jitter on odds (deterministic per game) ----------------------  ← NEW
     rng_odd = np.random.default_rng(subset["GAME_ID"].values + 17)
     mult    = 1.0 + rng_odd.uniform(-ODD_JITTER, ODD_JITTER, len(ml_home))
 
@@ -113,7 +103,6 @@ def main() -> None:
     ml_home = np.sign(ml_home) * abs_home
     ml_away = np.sign(ml_away) * abs_away
 
-    # assemble & save ----------------------------------------------------
     out = pd.DataFrame({
         "GAME_ID":   subset.get("GAME_ID", np.arange(len(subset))),
         "GAME_DATE": subset["GAME_DATE"],

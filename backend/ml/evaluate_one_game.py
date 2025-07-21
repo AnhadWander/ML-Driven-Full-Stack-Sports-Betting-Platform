@@ -15,7 +15,6 @@ def train_until(cutoff_index, df):
 
 def evaluate_random():
     df = pd.read_csv(FEAT_DATA)
-    # pick a game that is NOT the very first one
     test_idx = random.randrange(50, len(df))     
     test_row = df.iloc[test_idx]
     
@@ -33,7 +32,6 @@ def evaluate_random():
     print(f"Acc           : {accuracy_score([y_true],[y_pred]):.2f}")
     print(f"ROC-AUC       : {roc_auc_score([y_true],[y_prob]):.2f}")
     
-    # (optional) save latest full-history model for API use
     if not os.path.exists(MODEL_PATH):
         full_model = train_until(len(df), df)
         os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)

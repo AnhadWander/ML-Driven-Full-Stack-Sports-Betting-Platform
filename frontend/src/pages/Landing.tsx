@@ -45,7 +45,6 @@ export default function Landing({ days }: Props) {
           </div>
         </header>
 
-        {/* Quote footer */}
         <footer className="pb-10 text-center text-lg text-gray-300 font-medium italic drop-shadow-md">
           “You miss 100% of the shots you don’t take.” — Wayne Gretzky
         </footer>

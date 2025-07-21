@@ -10,9 +10,7 @@ from fastapi.encoders import jsonable_encoder
 
 pd.set_option("future.no_silent_downcasting", True)
 
-# --------------------------------------------------------------------------- #
-# Paths                                                                       #
-# --------------------------------------------------------------------------- #
+
 BASE_DIR = Path(__file__).resolve().parents[2]
 
 PREDICTED = BASE_DIR / "data" / "processed" / "predicted_odds.csv"
@@ -23,9 +21,7 @@ for f in (PREDICTED, CLEANED, META):
     if not f.exists():
         raise FileNotFoundError(f"Required file missing → {f}")
 
-# --------------------------------------------------------------------------- #
-# Build enriched odds DataFrame                                               #
-# --------------------------------------------------------------------------- #
+
 odds = pd.read_csv(PREDICTED, parse_dates=["GAME_DATE"])
 games = pd.read_csv(CLEANED,   parse_dates=["GAME_DATE"])
 meta  = pd.read_csv(META, usecols=["TEAM_ID", "TEAM_ABBREV"])
@@ -63,9 +59,7 @@ odds = odds.rename(
     }
 ).set_index("game_date")
 
-# --------------------------------------------------------------------------- #
-# FastAPI router                                                              #
-# --------------------------------------------------------------------------- #
+
 router = APIRouter(prefix="/api")
 
 
@@ -85,16 +79,12 @@ def odds_for_day(date: str = Query(..., pattern=r"\d{4}-\d{2}-\d{2}")):
     if rows.empty:
         raise HTTPException(status_code=404, detail=f"No games on {date}")
 
-    # ------------------------------------------------------------------ #
-    # Sanitize for JSON                                                  #
-    # ------------------------------------------------------------------ #
-    rows = rows.replace([np.inf, -np.inf], np.nan)        # ±inf → NaN
-    rows = rows.where(pd.notnull(rows), None)             # NaN → None
 
-    # ---- NEW: make sure object columns don't carry NaN ---------------- #
-    rows["home_abbrev"] = rows["home_abbrev"].fillna("")  # ①
-    rows["away_abbrev"] = rows["away_abbrev"].fillna("")  # ②
-    # ------------------------------------------------------------------- #
+    rows = rows.replace([np.inf, -np.inf], np.nan)        
+    rows = rows.where(pd.notnull(rows), None)            
+
+    rows["home_abbrev"] = rows["home_abbrev"].fillna("")  
+    rows["away_abbrev"] = rows["away_abbrev"].fillna("") 
 
     payload = rows[
         ["game_id", "ml_home", "ml_away",
@@ -102,6 +92,5 @@ def odds_for_day(date: str = Query(..., pattern=r"\d{4}-\d{2}-\d{2}")):
          "home_abbrev", "away_abbrev"]
     ].reset_index(drop=True)
 
-    print(payload.head().to_dict("records"))              # ③ handy debug
-
+    print(payload.head().to_dict("records"))            
     return jsonable_encoder(payload.to_dict(orient="records"))

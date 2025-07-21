@@ -15,7 +15,6 @@ MODEL_PATH = 'backend/ml/model.pkl'
 def load_data():
     df = pd.read_csv(DATA_PATH)
 
-    # Features to use
     X = df.drop(columns=['GAME_ID', 'GAME_DATE_HOME', 'TEAM_NAME_HOME', 'TEAM_NAME_AWAY', 'HOME_WIN'])
     y = df['HOME_WIN']
 
@@ -30,12 +29,10 @@ def train_model():
     y_pred = model.predict(X_test)
     y_proba = model.predict_proba(X_test)[:, 1]
 
-    # Save model
     os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
     joblib.dump(model, MODEL_PATH)
     print(f"Model saved to {MODEL_PATH}")
 
-    # Evaluation metrics
     print("\n📊 Model Evaluation Metrics:")
     print(f"Accuracy: {accuracy_score(y_test, y_pred):.4f}")
     print(f"Precision: {precision_score(y_test, y_pred):.4f}")

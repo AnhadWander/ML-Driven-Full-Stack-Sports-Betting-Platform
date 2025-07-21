@@ -7,20 +7,18 @@ import OddsDashboard  from "./pages/OddsDashboard";
 import Login          from "./pages/Login";
 import PropsPage      from "./pages/PropsPage";
 import Wallet         from "./pages/Wallet";
-import MyBets         from "./pages/MyBets";      /* ⬅️ added */
+import MyBets         from "./pages/MyBets";      
 import "./index.css";
 
 export default function App() {
   const [days, setDays] = useState<string[]>([]);
 
-  /* fetch once at mount */
   useEffect(() => {
     fetchGameDays().then(setDays);
   }, []);
 
-  if (!days.length) return null;   /* simple loader while fetching */
+  if (!days.length) return null;  
 
-  /* all routing now lives here */
   return (
     <Routes>
       <Route path="/"            element={<Landing days={days} />} />

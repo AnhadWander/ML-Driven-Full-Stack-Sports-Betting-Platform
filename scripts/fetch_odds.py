@@ -10,14 +10,14 @@ import os, time, requests, pandas as pd
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
-load_dotenv()                         # loads ODDS_KEY from .env if present
+load_dotenv()                         
 API_KEY = os.getenv("ODDS_KEY")
 assert API_KEY, "Set ODDS_KEY in env or .env"
 
-START_DATE = datetime(2022, 10, 1)    # first date you care about
-END_DATE   = datetime(2025, 6, 30)    # last date (today-ish)
+START_DATE = datetime(2022, 10, 1)    
+END_DATE   = datetime(2025, 6, 30)    
 
-TEAM_MAP = (                          # Odds-API → your ABBR
+TEAM_MAP = (                         
     pd.read_csv("data/static/odds_team_map.csv")
       .set_index("ODDS_NAME")["TEAM_ABBREV"]
       .to_dict()
@@ -51,14 +51,13 @@ def fetch_day(day: datetime):
 
     for game in r.json():
         home_name = game["home_team"]
-        away_name = game["away_team"]          # ← fixed
+        away_name = game["away_team"]         
         if home_name not in TEAM_MAP or away_name not in TEAM_MAP:
-            continue  # name mismatch (rare)
+            continue  
 
         h_abbr = TEAM_MAP[home_name]
         a_abbr = TEAM_MAP[away_name]
 
-        # --- extract opening lines from DraftKings ---------------
         bm = game["bookmakers"][0]
         spreads = next(m for m in bm["markets"] if m["key"] == "spreads")["outcomes"]
         h_spread = next(o for o in spreads if o["name"] == home_name)["point"]
@@ -85,7 +84,7 @@ day = START_DATE
 while day <= END_DATE:
     fetch_day(day)
     day += timedelta(days=1)
-    time.sleep(0.8)        # stay within free-tier rate limit
+    time.sleep(0.8)        
 
 pd.DataFrame(out_rows).to_csv(OUT_FILE, index=False)
 print("Saved →", OUT_FILE, len(out_rows), "rows")
