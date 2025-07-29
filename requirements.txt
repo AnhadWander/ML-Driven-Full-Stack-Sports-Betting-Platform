@@ -6,10 +6,10 @@ geopy
 python-dateutil
 fastapi          
 uvicorn[standard] 
-numpy             >=1.26
-itsdangerous>=2.1          # session signing
-authlib>=1.2               # OAuth 2 client
-python-dotenv>=1.0         # load GOOGLE_CLIENT_ID etc. from .env
+numpy             
+itsdangerous>=2.1          
+authlib>=1.2               
+python-dotenv>=1.0         
 httpx>=0.25
 authlib[client]
 python-jose[cryptography]
