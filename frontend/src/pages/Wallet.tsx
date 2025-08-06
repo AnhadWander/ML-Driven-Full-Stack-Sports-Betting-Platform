@@ -91,7 +91,7 @@ export default function Wallet() {
                   className={`rounded-lg px-4 py-2 text-sm font-semibold text-white
                     ${
                       b.m === "deposit"
-                        ? "bg-indigo-500 hover:bg-indigo-600"
+                        ? "bg-emerald-600 hover:bg-emerald-700"  
                         : "bg-rose-500 hover:bg-rose-600"
                     }`}
                 >
@@ -200,7 +200,7 @@ export default function Wallet() {
                     className={`rounded px-4 py-2 text-sm font-semibold text-white
                       ${
                         mode === "deposit"
-                          ? "bg-indigo-600 hover:bg-indigo-700"
+                          ? "bg-emerald-600 hover:bg-emerald-700" 
                           : "bg-rose-600 hover:bg-rose-700"
                       }`}
                   >

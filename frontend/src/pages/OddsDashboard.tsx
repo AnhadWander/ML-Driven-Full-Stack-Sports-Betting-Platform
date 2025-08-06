@@ -20,11 +20,9 @@ export default function OddsDashboard({ days }: Props) {
       <main className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#eef2f7] to-[#e2e8f0] p-6">
 
         <section className="mx-auto mb-10 flex max-w-7xl flex-col items-center justify-between gap-4 sm:flex-row">
-          <h2 className="text-4xl font-extrabold tracking-tight text-gray-800 drop-shadow-sm">
+          <h2 className="text-4xl font-extrabold tracking-tight text-slate-900">
             Odds for{" "}
-            <span className="rounded-lg bg-rose-500/10 px-2 py-1 font-black text-rose-600">
-              {dt}
-            </span>
+            <span className="font-extrabold text-slate-900">{dt}</span>
           </h2>
 
           <select

@@ -19,64 +19,63 @@ export default function Login() {
   return (
     <>
       <NavBar />
-      <main className="grid min-h-screen place-items-center bg-gradient-to-br from-indigo-600 via-sky-500 to-emerald-400 p-6">
-        <div className="w-full max-w-sm rounded-3xl bg-white/90 p-10 shadow-xl backdrop-blur">
-          <h2 className="mb-8 text-center text-3xl font-extrabold text-gray-900">
-            Welcome&nbsp;to&nbsp;HoopBetz
-          </h2>
 
-          <button
-            onClick={() => (window.location.href = GOOGLE_AUTH_URL)}
-            className="relative flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white py-2 font-medium shadow-sm transition hover:bg-gray-50 active:scale-95"
-          >
-            <img
-              src="https://developers.google.com/identity/images/g-logo.png"
-              alt=""
-              className="h-5 w-5"
-            />
-            <span className="text-sm text-gray-700">Sign&nbsp;in&nbsp;with&nbsp;Google</span>
-          </button>
+      <main className="grid h-[calc(100vh-64px)] place-items-center bg-black px-6">
+        <div className="flex flex-col items-center gap-20">
+          <h1 className="text-center text-5xl md:text-6xl font-extrabold tracking-tight">
+            <span className="text-white">Login to </span>
+            <span className="text-white">Hoop</span>
+            <span className="text-yellow-300">Betz</span>
+          </h1>
 
-          <div className="my-6 flex items-center">
-            <span className="h-px flex-1 bg-gray-200" />
-            <span className="mx-3 text-xs uppercase tracking-wider text-gray-400">
-              or
-            </span>
-            <span className="h-px flex-1 bg-gray-200" />
-          </div>
-
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              nav("/wallet");
-            }}
-            className="space-y-4"
-          >
-            <label className="block text-sm font-medium text-gray-700">
-              Email
-              <input
-                type="email"
-                required
-                className="mt-1 w-full rounded-md border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
-              />
-            </label>
-
-            <label className="block text-sm font-medium text-gray-700">
-              Password
-              <input
-                type="password"
-                required
-                className="mt-1 w-full rounded-md border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
-              />
-            </label>
-
+          <div className="w-full max-w-sm rounded-2xl bg-white p-10 shadow-xl ring-1 ring-black/10">
             <button
-              type="submit"
-              className="w-full rounded-lg bg-indigo-600 py-2 font-semibold text-white transition hover:bg-indigo-700 active:scale-95"
+              onClick={() => (window.location.href = GOOGLE_AUTH_URL)}
+              className="relative mb-6 flex w-full items-center justify-center gap-3 rounded-lg border border-slate-300 bg-white px-3 py-2 font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 active:translate-y-px"
             >
-              Sign&nbsp;in
+              <img
+                src="https://developers.google.com/identity/images/g-logo.png"
+                alt=""
+                className="h-5 w-5"
+              />
+              <span className="text-sm">Sign in with Google</span>
             </button>
-          </form>
+
+            <div className="my-4 h-px w-full bg-slate-200" />
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                nav("/wallet");
+              }}
+              className="space-y-4"
+            >
+              <label className="block text-sm font-medium text-slate-700">
+                Email
+                <input
+                  type="email"
+                  required
+                  className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+                />
+              </label>
+
+              <label className="block text-sm font-medium text-slate-700">
+                Password
+                <input
+                  type="password"
+                  required
+                  className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+                />
+              </label>
+
+              <button
+                type="submit"
+                className="w-full rounded-lg bg-black px-4 py-2 font-semibold text-white shadow-sm transition hover:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-black/20 active:translate-y-px"
+              >
+                Sign in
+              </button>
+            </form>
+          </div>
         </div>
       </main>
     </>

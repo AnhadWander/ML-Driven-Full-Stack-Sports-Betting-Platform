@@ -70,28 +70,24 @@ export default function OddsTable({ date, onLoading, className }: Props) {
               </dd>
             </dl>
 
-            <div className="mt-4 flex justify-center gap-4 pb-6">
+            <div className="mt-5 flex justify-center gap-3 pb-6">
               <button
-                className="rounded bg-green-600 px-4 py-1 text-white hover:bg-green-700"
-                onClick={() => {
-                  setChosen(g);
-                  setSide("home");
-                  setOpen(true);
-                }}
+                type="button"
+                className="rounded-lg bg-black px-4 py-1.5 text-sm font-semibold text-white shadow-sm ring-1 ring-black/10 transition hover:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-black/20 active:translate-y-px"
+                onClick={() => { setChosen(g); setSide("home"); setOpen(true); }}
               >
-                Bet&nbsp;{g.home_abbrev}
+                Bet {g.home_abbrev}
               </button>
+
               <button
-                className="rounded bg-blue-600 px-4 py-1 text-white hover:bg-blue-700"
-                onClick={() => {
-                  setChosen(g);
-                  setSide("away");
-                  setOpen(true);
-                }}
+                type="button"
+                className="rounded-lg bg-black px-4 py-1.5 text-sm font-semibold text-white shadow-sm ring-1 ring-black/10 transition hover:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-black/20 active:translate-y-px"
+                onClick={() => { setChosen(g); setSide("away"); setOpen(true); }}
               >
-                Bet&nbsp;{g.away_abbrev}
+                Bet {g.away_abbrev}
               </button>
             </div>
+
           </article>
         ))}
       </section>
