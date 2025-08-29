@@ -20,7 +20,11 @@ export default function Login() {
     <>
       <NavBar />
 
-      <main className="grid h-[calc(100vh-64px)] place-items-center bg-black px-6">
+      {/* Background image lives in /frontend/public -> served at /NBATeamWallpaper.png */}
+      <main
+        className="grid h-[calc(100vh-64px)] place-items-center bg-black bg-cover bg-center bg-no-repeat px-6"
+        style={{ backgroundImage: 'url(/NBATeamWallpaper.jpg)' }}
+      >
         <div className="flex flex-col items-center gap-20">
           <h1 className="text-center text-5xl md:text-6xl font-extrabold tracking-tight">
             <span className="text-white">Login to </span>
