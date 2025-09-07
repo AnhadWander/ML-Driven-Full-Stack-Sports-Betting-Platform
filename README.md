@@ -30,7 +30,7 @@ It has since grown into a full‑blown betting experience:
 - Expandable to props / parlays thanks to a clean API boundary  
 - 100% typed (FastAPI + Pydantic & React + TypeScript)
 
-<video src="demo/hoopbetzdemovideo.mp4" controls width="600"></video>
+[![Watch the demo](demo/HoopBetzDemoThumbnail.png)](https://youtu.be/3cQdmrw7UJ8)
 
 ---
 
