@@ -4,13 +4,14 @@
 <details>
 <summary><strong>Table&nbsp;of&nbsp;Contents</strong></summary>
 
-1. [What is HoopBetz?](#what-is-hoopbetz)  
-2. [Tech-stack](#tech-stack)  
-3. [How to setup](#how-to-setup)  
-4. [Data & ML Infrastructure](#data--ml-infrastructure)  
-5. [Backend Architecture & API Design](#backend-architecture--api-design)  
-6. [Frontend](#frontend)  
-7. [Conclusion](#conclusion)  
+1. [What is HoopBetz?](#what-is-hoopbetz)
+2. [Demo Video](#demo-video)
+3. [Tech-stack](#tech-stack)  
+4. [How to setup](#how-to-setup)  
+5. [Data & ML Infrastructure](#data--ml-infrastructure)  
+6. [Backend Architecture & API Design](#backend-architecture--api-design)  
+7. [Frontend](#frontend)  
+8. [Conclusion](#conclusion)  
 
 </details>
 
@@ -32,7 +33,7 @@ It has since grown into a full‑blown betting experience:
 
 ---
 
-## 🎥 Demo Video
+## Demo Video
 
 [![Watch the demo](demo/HoopBetzDemoThumbnail.png)](https://youtu.be/3cQdmrw7UJ8)
 
